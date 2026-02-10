@@ -1,8 +1,8 @@
 import datetime
 
 class standard_user:
-    def __init__(self, name, email, password):
-        self.display_name = name
+    def __init__(self, email, password):
+        self.name = email
         self.type = "standard_user"
         self.is_admin = False
         self.date_joined = datetime.datetime.now()
@@ -13,22 +13,18 @@ class standard_user:
         self.bio = None
         self.profile_picture = None # change to a path to a file later
         # below 2 attributes will be changed to accessing an authentication system. probably a json containing hashed values for now.
-        self.email = email
+        self.username = email
         self.password = password
         self.auth_success = False
 
 
-    def user_authentication(self, email, password):
-        pass
-       # this will be changed to accessing an authentication system. probably a json containing hashed values for now.
-
-    def login(self):
-        if self.user_authentication(self.email, self.password) and self.online == False:
+    def login(self, authenticator):
+        if authenticator and self.online == False:
             self.online = True
             self.last_online = datetime.datetime.now()
             self.auth_success = True
             return f"{self.name} has logged in."
-        elif self.user_authentication(self.email, self.password) and self.online == True:
+        elif authenticator and self.online == True:
             self.auth_success = False
             return f"{self.name} is already logged in."
         else:
@@ -41,7 +37,7 @@ class standard_user:
         return f"{self.name} has logged out."
 
     def get_profile(self):
-        return f"Name: {self.name}\nType: {self.type}\nDate Joined: {self.date_joined}\nOnline: {self.online}\nLast Online: {self.last_online}\nPosts: {self.post_count}"
+        return f"Name: {self.name}\nType: {self.type}\nDate Joined: {self.date_joined}\nOnline: {self.online}\nLast Online: {self.last_online}\nBio: {self.bio}\nPosts: {self.post_count}"
 
     def report_user(self):
         pass
