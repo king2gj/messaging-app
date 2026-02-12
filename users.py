@@ -47,7 +47,7 @@ class standard_user:
         pass
         # this will be changed to accessing a deletion system. probably a json containing deleted users for now.
 
-    def edit_profile(self, name, bio, profile_picture):
+    def edit_profile(self, name = None, bio = None, profile_picture = None):
         self.name = name
         self.bio = bio
         self.profile_picture = profile_picture
