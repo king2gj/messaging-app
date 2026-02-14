@@ -1,7 +1,12 @@
+import uuid
+import datetime
+
 class standard_message:
-    def __init__(self, message, creator):
+    def __init__(self, message, creator_ID):
+        self.message_ID = uuid.uuid4()
+        self.date_created = datetime.datetime.now()
         self.message = message
-        self.creator = creator
+        self.creator_ID = creator_ID
         self.likes = 0
         self.dislikes = 0
         self.priority = 0
@@ -47,9 +52,11 @@ class standard_message:
         return f"{self.message} - {self.creator} ({self.likes} likes, {self.dislikes} dislikes)"
     
 class announcement:
-    def __init__(self, message, creator):
+    def __init__(self, message, creator_ID):
+        self.message_ID = uuid.uuid4()
+        self.date_created = datetime.datetime.now()
         self.message = message
-        self.creator = creator
+        self.creator_ID = creator_ID
         self.priority = 1
         self.report_count = 0
         self.report_flag = False
@@ -85,11 +92,11 @@ class announcement:
 
 class message_factory:
     @staticmethod
-    def create_message(message_type, message, creator):
+    def create_message(message_type, message, creator_ID):
         if message_type == "standard":
-            return standard_message(message, creator)
+            return standard_message(message, creator_ID)
         elif message_type == "announcement":
-            return announcement(message, creator)
+            return announcement(message, creator_ID)
         else:
             raise ValueError("Invalid message type")
 

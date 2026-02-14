@@ -1,7 +1,9 @@
 import datetime
+import uuid
 
 class standard_user:
     def __init__(self, email, password):
+        self.user_ID = uuid.uuid4()
         self.name = email
         self.type = "standard_user"
         self.is_admin = False
@@ -56,6 +58,7 @@ class standard_user:
 class admin_user(standard_user):
     def __init__(self, name, email, password):
         super().__init__(name, email, password)
+        self.user_ID = uuid.uuid4()
         self.type = "admin_user"
         self.is_admin = True
         self.posts = []
