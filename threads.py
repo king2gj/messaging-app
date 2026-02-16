@@ -1,7 +1,9 @@
 import datetime
+import uuid
 
 class thread:
     def __init__(self, creator_ID, name, description, group_ID = None, course_code = None, section_ID = None, priority = 0):
+        self.thread_ID = uuid.uuid4()
         self.creator_ID = creator_ID
         self.name = name
         self.description = description
@@ -50,10 +52,10 @@ class thread:
         else:
             return "Thread is locked."
         
-    def remove_message(self, message_ID):
+    def remove_message(self, message):
         if self.is_locked != True:
             if self.is_active == True:
-                self.messages.remove(message_ID)
+                self.messages.remove(message)
                 self.message_count -= 1
             else:
                 return "Thread is not active."
@@ -84,7 +86,7 @@ class thread:
     def display_thread(self):
         header =  f"Thread Name: {self.name}\nDescription: {self.description}\nCreation Date: {self.creation_date}\nMessage Count: {self.message_count}\nMembers: {self.members}\nIs Active: {self.is_active}\n"
         
-        messages = "\n\n".join(message for message in self.messages)
+        messages = "\n\n".join(str(message) for message in self.messages)
 
         return f"{header}\n\n{messages}"
 
