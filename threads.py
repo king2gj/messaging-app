@@ -22,35 +22,50 @@ class thread:
         self.report_count = 0
         self.is_locked = False
 
-    def add_message(self, message):
-        if self.is_locked != True:
-            if self.is_active == True:
-                self.messages.append(message)
-                self.message_count += 1
-                self.last_message_date = datetime.datetime.now()
-                self.last_message = message
+    def add_message(self, message, user_ID):
+        if user_ID in self.members:
+            if self.is_locked != True:
+                if self.is_active == True:
+                    self.messages.append(message)
+                    self.message_count += 1
+                    self.last_message_date = datetime.datetime.now()
+                    self.last_message = message
+                else:
+                    return "Thread is not active."
             else:
-                return "Thread is not active."
+                return "Thread is locked."
         else:
-            return "Thread is locked."
+            return "You are not a member of this thread."
 
-    def add_member(self, member_ID):
-        if self.is_locked != True:
-            if self.is_active == True:
-                self.members.append(member_ID)
+    def add_member(self, member_ID, user_ID):
+        if user_ID == self.creator_ID:
+            if self.is_locked != True:
+                if self.is_active == True:
+                    self.members.append(member_ID)
+                else:
+                    return "Thread is not active."
             else:
-                return "Thread is not active."
+                return "Thread is locked."
         else:
-            return "Thread is locked."
+            return "You are not the creator of this thread."
         
-    def remove_member(self, member_ID):
-        if self.is_locked != True:
-            if self.is_active == True:
-                self.members.remove(member_ID)
+    def remove_member(self, member_ID, user_ID):
+        if user_ID == self.creator_ID:
+            if self.is_locked != True:
+                if self.is_active == True:
+                    if member_ID in self.members:
+                        if member_ID == self.creator_ID:
+                            return "You cannot remove yourself as the creator of this thread."
+                        else:
+                            self.members.remove(member_ID)
+                    else:
+                        return "Member is not in the thread."
+                else:
+                    return "Thread is not active."
             else:
-                return "Thread is not active."
+                return "Thread is locked."
         else:
-            return "Thread is locked."
+            return "You are not the creator of this thread."
         
     def remove_message(self, message):
         if self.is_locked != True:
@@ -72,11 +87,29 @@ class thread:
             self.lock_thread()
             return "Thread has been deactivated due to too many reports."
 
-    def activate_thread(self):
-        self.is_active = True
+    def activate_thread(self, user_ID):
+        if user_ID == self.creator_ID:
+            if self.is_locked != True:
+                if self.is_active == False:
+                    self.is_active = True
+                else:
+                    return "Thread is already active."
+            else:
+                return "Thread is locked."
+        else:
+            return "You are not the creator of this thread."
 
-    def deactivate_thread(self):
-        self.is_active = False
+    def deactivate_thread(self, user_ID):
+        if user_ID == self.creator_ID:
+            if self.is_locked != True:
+                if self.is_active == True:
+                    self.is_active = False
+                else:
+                    return "Thread is already deactivated."
+            else:
+                return "Thread is locked."
+        else:
+            return "You are not the creator of this thread."
 
     def lock_thread(self):
         self.is_active = False
@@ -88,7 +121,30 @@ class thread:
         
         messages = "\n\n".join(str(message) for message in self.messages)
 
-        return f"{header}\n\n{messages}"
+        if self.is_locked == True:
+            return f"{header}\n\nThread is locked."
+        else:
+            return f"{header}\n\n{messages}"
+    
+    def edit_thread(self, user_ID, name, description, group_ID = None, course_code = None, section_ID = None, priority = 0):
+        if user_ID == self.creator_ID:    
+            if self.is_locked != True:
+                if self.is_active == True:
+                    self.name = name
+                    self.description = description
+                    self.group_ID = group_ID
+                    self.course_code = course_code
+                    self.section_ID = section_ID
+                    self.priority = priority
+                else:
+                    return "Thread is not active."
+            else:
+                return "Thread is locked."
+        else:
+            return "You are not the creator of this thread."
+    
+    def __str__(self):
+        return self.display_thread()
 
 
 
