@@ -12,3 +12,4 @@
 # Ignore auxillary python files
 /__pycache__
 *test.py
+/.venv
