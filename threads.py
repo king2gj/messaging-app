@@ -21,6 +21,7 @@ class thread:
         self.is_reported = False
         self.report_count = 0
         self.is_locked = False
+        self.is_deleted = False
 
     def add_message(self, message, user_ID):
         if user_ID in self.members:
@@ -42,6 +43,19 @@ class thread:
             if self.is_locked != True:
                 if self.is_active == True:
                     self.members.append(member_ID)
+                else:
+                    return "Thread is not active."
+            else:
+                return "Thread is locked."
+        else:
+            return "You are not the creator of this thread."
+        
+    def make_creator(self, user_ID):
+        if user_ID == self.creator_ID:
+            if self.is_locked != True:
+                if self.is_active == True:
+                    if user_ID in self.members:
+                        self.creator_ID = user_ID
                 else:
                     return "Thread is not active."
             else:
@@ -121,10 +135,13 @@ class thread:
         
         messages = "\n\n".join(str(message) for message in self.messages)
 
-        if self.is_locked == True:
-            return f"{header}\n\nThread is locked."
+        if self.is_deleted:
+            return "Thread has been deleted."
         else:
-            return f"{header}\n\n{messages}"
+            if self.is_locked == True:
+                return f"{header}\n\nThread is locked."
+            else:
+                return f"{header}\n\n{messages}"
     
     def edit_thread(self, user_ID, name, description, group_ID = None, course_code = None, section_ID = None, priority = 0):
         if user_ID == self.creator_ID:    
@@ -145,6 +162,37 @@ class thread:
     
     def __str__(self):
         return self.display_thread()
+    
+    def delete_thread(self, user_ID):
+        if user_ID == self.creator_ID:
+            if self.is_locked != True:
+                if self.is_active == True:
+                    # wipe all self attributes to none
+                    self.creator_ID = None
+                    self.name = None
+                    self.description = None
+                    self.course_code = None
+                    self.section_ID = None
+                    self.group_ID = None
+                    self.priority = None
+                    self.members = None
+                    self.messages = None
+                    self.message_count = None
+                    self.creation_date = None
+                    self.last_message_date = None
+                    self.last_message = None
+                    self.is_active = None
+                    self.is_reported = None
+                    self.report_count = None
+                    self.is_locked = None
+                    self.is_deleted = True
+                    return "Thread has been deleted."
+                else:
+                    return "Thread is not active."
+            else:
+                return "Thread is locked."
+        else:
+            return "You are not the creator of this thread."
 
 
 
