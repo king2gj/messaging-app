@@ -1,8 +1,25 @@
-from flask import Flask, render_template, request, redirect, url_for
+from unicodedata import name
+
+from flask import Flask, render_template, request, redirect, url_for, session
+import database.py, authenticator.py
 app = Flask(__name__)
+
+db = database.access_database()
+conn = db.connect()
 
 def login():
     return "Login successful."
+
+
+@app.route("/dashboard")
+def dashboard():
+    if 'username' not in session:
+        return redirect(url_for('signin'))
+    return render_template(
+        'dashboard.html', 
+        username=session['username'],
+        role=session['role']
+    )
 
 @app.route("/")
 def index(name=None):
@@ -11,17 +28,19 @@ def index(name=None):
 @app.route("/search", methods=["GET", "POST"])
 def search():
 
-
 @app.route("/signup")
 def signup():
 
-@app.route("/signin", methods=["GET", "POST"])
+@app.route("/signin", methods=["POST"])
 def signin():
     if request.method == "POST":
-        return login()
-        #database access logic
-    else:
-        return render_template("signin.html")
+        email = request.form.get("email")
+        password = request.form.get("password")
+        authenticator = authenticator.authenticate(email, password)
+        if authenticator:
+            return redirect(url_for("dashboard"))
+        else:
+            return render_template("signin.html")
         
 
 @app.route("/signout")
