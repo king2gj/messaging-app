@@ -1,12 +1,29 @@
 import os
 import mysql.connector
 from mysql.connector import connect, Error
+from pathlib import Path
 
 try:
     from dotenv import load_dotenv
     load_dotenv()
 except Exception:
     pass
+
+def load_sql(path: str | Path) -> str:
+    path = Path(path)
+    return path.read_text(encoding="utf-8")
+
+def add_new_report(reporter_id: int, post_id: int, report_content: str, cursor):
+    if len(report_content) > 200:
+        raise ValueError("Report content cannot exceed 200 characters")
+
+    sql = load_sql("sql/reports/create_new_report.sql")
+    params = (reporter_id, post_id, report_content)
+    cursor.execute(sql, params)
+
+    sql = load_sql("sql/posts/increment_report_count.sql")
+    params = (post_id,)
+    cursor.execute(sql, params)
 
 class access_database:
     def __init__(self, host=None, user=None, password=None, database=None, port=None):
