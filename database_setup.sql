@@ -22,31 +22,45 @@ CREATE TABLE auth (
     ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+CREATE TABLE colleges (
+    college_id  BIGINT UNSIGNED PRIMARY KEY,
+    name        VARCHAR(100) NOT NULL UNIQUE
+)
+
 CREATE TABLE courses (
-  course_code       VARCHAR(12) PRIMARY KEY,
-  offering_college  VARCHAR(100) NOT NULL,
-  name              VARCHAR(100) NOT NULL
+  course_id    BIGINT UNSIGNED PRIMARY KEY,
+  college_id   BIGINT UNSIGNED NOT NULL,
+  course_code  VARCHAR(12) NOT NULL UNIQUE,
+  name         VARCHAR(100) NOT NULL,
+
+  CONSTRAINT fk_course__college
+    FOREIGN KEY (college_id) REFERENCES colleges(college_id)
+    ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE sections (
   section_id      BIGINT UNSIGNED PRIMARY KEY,
-  course_code     VARCHAR(12) NOT NULL,
+  course_id       BIGINT UNSIGNED NOT NULL,
   section_number  INT UNSIGNED NOT NULL,
 
   CONSTRAINT fk_section__course
-    FOREIGN KEY (course_code) REFERENCES courses(course_code)
+    FOREIGN KEY (course_id) REFERENCES courses(course_id)
     ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE message_groups (
   group_id     BIGINT UNSIGNED PRIMARY KEY,
   group_scope  TINYINT UNSIGNED NOT NULL,
-  college      VARCHAR(100) NULL,
-  course_code  VARCHAR(12) NULL,
+  college_id   BIGINT UNSIGNED NULL,
+  course_id    BIGINT UNSIGNED NULL,
   section_id   BIGINT UNSIGNED NULL,
 
+  CONSTRAINT fk_message_group__college
+    FOREIGN KEY (college_id) REFERENCES colleges(college_id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+
   CONSTRAINT fk_message_group__course
-    FOREIGN KEY (course_code) REFERENCES courses(course_code)
+    FOREIGN KEY (course_id) REFERENCES courses(course_id)
     ON DELETE CASCADE ON UPDATE CASCADE,
 
   CONSTRAINT fk_message_group__section
