@@ -13,7 +13,7 @@ def load_sql(path: str | Path) -> str:
     path = Path(path)
     return path.read_text(encoding="utf-8")
 
-def get_user_id(
+def get_user_id_by_username(
         username: str,
         cursor) -> bytes:
     sql = load_sql("sql/users/get_id_by_username.sql")
