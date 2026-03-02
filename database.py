@@ -13,11 +13,56 @@ def load_sql(path: str | Path) -> str:
     path = Path(path)
     return path.read_text(encoding="utf-8")
 
-def add_new_report(report_id: bytes, reporter_id: bytes, post_id: bytes, report_content: str, cursor):
+def get_user_id(
+        username: str,
+        cursor) -> bytes:
+    sql = load_sql("sql/users/get_id_by_username.sql")
+    params = (username,)
+    cursor.execute(sql, params)
+
+    (user_id,) = cursor.fetchone()
+    return user_id
+
+def add_new_user(
+        user_id: bytes,
+        username: str,
+        first_name: str,
+        last_name: str,
+        email:str,
+        bio: str,
+        is_admin: bool,
+        hashed_password: bytes,
+        salt_code: str,
+        cursor) -> None:
+    if len(user_id) != 16:
+        raise ValueError("ID must be 16 bytes")
+    for x in {username, first_name, last_name, email}:
+        if len(x) > 32:
+            raise ValueError("Username, first name, last name, and email cannot exceed 32 characters")
+    if len(bio) > 160:
+        raise ValueError("Bio cannot exceed 160 characters")
+    if len(hashed_password) != 32:
+        raise ValueError("Hashed password must be 32 bytes")
+    if len(salt_code) > 32:
+        raise ValueError("Salt code cannot exceed 32 characters")
+
+    sql = load_sql("sql/users/create_new_user.sql")
+    params = (user_id, username, first_name, last_name, email, bio, is_admin)
+    cursor.execute(sql, params)
+
+    sql = load_sql("sql/auth/create_new_auth.sql")
+    params = (user_id, hashed_password, salt_code)
+    cursor.execute(sql, params)
+
+def add_new_report(
+        report_id: bytes,
+        reporter_id: bytes,
+        post_id: bytes,
+        report_content: str,
+        cursor) -> None:
     for x in {report_id, reporter_id, post_id}:
         if len(x) != 16:
             raise ValueError("All IDs must be 16 bytes")
-
     if len(report_content) > 200:
         raise ValueError("Report content cannot exceed 200 characters")
 

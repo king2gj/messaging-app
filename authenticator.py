@@ -14,7 +14,7 @@ class Authenticator:
 
     def hash_password(self, password):
         salted_password = password + self.salt
-        hashed_password = hashlib.sha256(salted_password.encode()).hexdigest()
+        hashed_password = hashlib.sha256(salted_password.encode()).digest()
         return hashed_password
     
     def save_user_data(self, username, password):
