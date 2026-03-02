@@ -2,7 +2,7 @@ CREATE DATABASE message_board;
 USE message_board;
 
 CREATE TABLE users (
-  user_id      BIGINT UNSIGNED PRIMARY KEY,
+  user_id      BINARY(16) PRIMARY KEY,
   username     VARCHAR(32) NOT NULL UNIQUE,
   first_name   VARCHAR(32) NOT NULL,
   last_name    VARCHAR(32) NOT NULL,
@@ -13,7 +13,7 @@ CREATE TABLE users (
 );
 
 CREATE TABLE auth (
-  user_id          BIGINT UNSIGNED PRIMARY KEY,
+  user_id          BINARY(16) PRIMARY KEY,
   hashed_password  BINARY(32) NOT NULL,
   salt_code        VARCHAR(32) NOT NULL,
   
@@ -23,13 +23,13 @@ CREATE TABLE auth (
 );
 
 CREATE TABLE colleges (
-    college_id  BIGINT UNSIGNED PRIMARY KEY,
+    college_id  BINARY(16) PRIMARY KEY,
     name        VARCHAR(100) NOT NULL UNIQUE
 )
 
 CREATE TABLE courses (
-  course_id    BIGINT UNSIGNED PRIMARY KEY,
-  college_id   BIGINT UNSIGNED NOT NULL,
+  course_id    BINARY(16) PRIMARY KEY,
+  college_id   BINARY(16) NOT NULL,
   course_code  VARCHAR(12) NOT NULL UNIQUE,
   name         VARCHAR(100) NOT NULL,
 
@@ -39,8 +39,8 @@ CREATE TABLE courses (
 );
 
 CREATE TABLE sections (
-  section_id      BIGINT UNSIGNED PRIMARY KEY,
-  course_id       BIGINT UNSIGNED NOT NULL,
+  section_id      BINARY(16) PRIMARY KEY,
+  course_id       BINARY(16) NOT NULL,
   section_number  INT UNSIGNED NOT NULL,
 
   CONSTRAINT fk_section__course
@@ -49,11 +49,11 @@ CREATE TABLE sections (
 );
 
 CREATE TABLE message_groups (
-  group_id     BIGINT UNSIGNED PRIMARY KEY,
+  group_id     BINARY(16) PRIMARY KEY,
   group_scope  TINYINT UNSIGNED NOT NULL,
-  college_id   BIGINT UNSIGNED NULL,
-  course_id    BIGINT UNSIGNED NULL,
-  section_id   BIGINT UNSIGNED NULL,
+  college_id   BINARY(16) NULL,
+  course_id    BINARY(16) NULL,
+  section_id   BINARY(16) NULL,
 
   CONSTRAINT fk_message_group__college
     FOREIGN KEY (college_id) REFERENCES colleges(college_id)
@@ -69,8 +69,8 @@ CREATE TABLE message_groups (
 );
 
 CREATE TABLE group_members (
-  group_id  BIGINT UNSIGNED NOT NULL,
-  user_id   BIGINT UNSIGNED NOT NULL,
+  group_id  BINARY(16) NOT NULL,
+  user_id   BINARY(16) NOT NULL,
   role      VARCHAR(20) NOT NULL,
 
   PRIMARY KEY (group_id, user_id),
@@ -85,10 +85,10 @@ CREATE TABLE group_members (
 );
 
 CREATE TABLE posts (
-  post_id         BIGINT UNSIGNED PRIMARY KEY,
-  parent_post_id  BIGINT UNSIGNED NULL,
-  group_id        BIGINT UNSIGNED NOT NULL,
-  user_id         BIGINT UNSIGNED NOT NULL,
+  post_id         BINARY(16) PRIMARY KEY,
+  parent_post_id  BINARY(16) NULL,
+  group_id        BINARY(16) NOT NULL,
+  user_id         BINARY(16) NOT NULL,
   time_posted     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   comment_count   INT UNSIGNED NULL,
   like_count      INT UNSIGNED NOT NULL DEFAULT 0,
@@ -109,9 +109,9 @@ CREATE TABLE posts (
 );
 
 CREATE TABLE media (
-  media_id   BIGINT UNSIGNED PRIMARY KEY,
-  user_id    BIGINT UNSIGNED NULL,
-  post_id    BIGINT UNSIGNED NULL,
+  media_id   BINARY(16) PRIMARY KEY,
+  user_id    BINARY(16) NULL,
+  post_id    BINARY(16) NULL,
   file_name  VARCHAR(100) NOT NULL,
   content    MEDIUMBLOB NOT NULL,
 
@@ -125,8 +125,8 @@ CREATE TABLE media (
 );
 
 CREATE TABLE liked_posts (
-  user_id  BIGINT UNSIGNED NOT NULL,
-  post_id  BIGINT UNSIGNED NOT NULL,
+  user_id  BINARY(16) NOT NULL,
+  post_id  BINARY(16) NOT NULL,
 
   PRIMARY KEY (user_id, post_id),
 
@@ -140,8 +140,8 @@ CREATE TABLE liked_posts (
 );
 
 CREATE TABLE disliked_posts (
-  user_id  BIGINT UNSIGNED NOT NULL,
-  post_id  BIGINT UNSIGNED NOT NULL,
+  user_id  BINARY(16) NOT NULL,
+  post_id  BINARY(16) NOT NULL,
 
   PRIMARY KEY (user_id, post_id),
 
@@ -155,9 +155,9 @@ CREATE TABLE disliked_posts (
 );
 
 CREATE TABLE reports (
-  report_id       BIGINT UNSIGNED PRIMARY KEY,
-  reporter_id     BIGINT UNSIGNED NOT NULL,
-  post_id         BIGINT UNSIGNED NOT NULL,
+  report_id       BINARY(16) PRIMARY KEY,
+  reporter_id     BINARY(16) NOT NULL,
+  post_id         BINARY(16) NOT NULL,
   report_time     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   report_content  VARCHAR(200) NOT NULL,
 

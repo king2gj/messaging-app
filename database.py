@@ -13,12 +13,16 @@ def load_sql(path: str | Path) -> str:
     path = Path(path)
     return path.read_text(encoding="utf-8")
 
-def add_new_report(reporter_id: int, post_id: int, report_content: str, cursor):
+def add_new_report(report_id: bytes, reporter_id: bytes, post_id: bytes, report_content: str, cursor):
+    for x in {report_id, reporter_id, post_id}:
+        if len(x) != 16:
+            raise ValueError("All IDs must be 16 bytes")
+
     if len(report_content) > 200:
         raise ValueError("Report content cannot exceed 200 characters")
 
     sql = load_sql("sql/reports/create_new_report.sql")
-    params = (reporter_id, post_id, report_content)
+    params = (report_id, reporter_id, post_id, report_content)
     cursor.execute(sql, params)
 
     sql = load_sql("sql/posts/increment_report_count.sql")
