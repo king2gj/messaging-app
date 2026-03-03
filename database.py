@@ -1,4 +1,6 @@
 import os
+import uuid
+
 import mysql.connector
 from mysql.connector import connect, Error
 from pathlib import Path
@@ -22,6 +24,26 @@ def get_user_id_by_username(
 
     (user_id,) = cursor.fetchone()
     return user_id
+
+def get_college_id_by_name(
+        name: str,
+        cursor) -> bytes:
+    sql = load_sql("sql/colleges/get_id_by_name.sql")
+    params = (name,)
+    cursor.execute(sql, params)
+
+    (college_id,) = cursor.fetchone()
+    return college_id
+
+def get_course_id_by_course_code(
+        course_code: str,
+        cursor) -> bytes:
+    sql = load_sql("sql/courses/get_id_by_course_code.sql")
+    params = (course_code,)
+    cursor.execute(sql, params)
+
+    (course_id,) = cursor.fetchone()
+    return course_id
 
 def add_new_user(
         user_id: bytes,
@@ -52,6 +74,68 @@ def add_new_user(
 
     sql = load_sql("sql/auth/create_new_auth.sql")
     params = (user_id, hashed_password, salt_code)
+    cursor.execute(sql, params)
+
+def add_new_college(
+        group_id: bytes,
+        name: str,
+        cursor) -> None:
+    if len(group_id) != 16:
+        raise ValueError("ID must be 16 bytes")
+    if len(name) > 100:
+        raise ValueError("College name cannot exceed 100 characters")
+
+    college_id = uuid.uuid4().bytes
+
+    sql = load_sql("sql/colleges/create_new_college.sql")
+    params = (college_id, name)
+    cursor.execute(sql, params)
+
+    sql = load_sql("sql/message_groups/create_new_college_group.sql")
+    params = (group_id, college_id)
+    cursor.execute(sql, params)
+
+def add_new_course(
+        group_id: bytes,
+        course_code: str,
+        name: str,
+        offering_college_name: str,
+        cursor) -> None:
+    if len(group_id) != 16:
+        raise ValueError("ID must be 16 bytes")
+    if len(course_code) > 12:
+        raise ValueError("Course code cannot exceed 12 characters")
+    if len(name) > 100:
+        raise ValueError("Course name cannot exceed 100 characters")
+
+    course_id = uuid.uuid4().bytes
+    college_id = get_college_id_by_name(offering_college_name, cursor)
+
+    sql = load_sql("sql/courses/create_new_course.sql")
+    params = (course_id, college_id, course_code, name)
+    cursor.execute(sql, params)
+
+    sql = load_sql("sql/message_groups/create_new_course_group.sql")
+    params = (group_id, course_id)
+    cursor.execute(sql, params)
+
+def add_new_section(
+        group_id: bytes,
+        course_code: str,
+        section_number: int,
+        cursor) -> None:
+    if len(group_id) != 16:
+        raise ValueError("ID must be 16 bytes")
+
+    section_id = uuid.uuid4().bytes
+    course_id = get_course_id_by_course_code(course_code, cursor)
+
+    sql = load_sql("sql/sections/create_new_section.sql")
+    params = (section_id, course_id, section_number)
+    cursor.execute(sql, params)
+
+    sql = load_sql("sql/message_groups/create_new_section_group.sql")
+    params = (group_id, section_id)
     cursor.execute(sql, params)
 
 def add_new_report(
