@@ -158,6 +158,21 @@ def add_new_report(
     params = (post_id,)
     cursor.execute(sql, params)
 
+def add_user_to_group(
+        user_id: bytes,
+        group_id: bytes,
+        role: str,
+        cursor) -> None:
+    for x in {user_id, group_id}:
+        if len(x) != 16:
+            raise ValueError("All IDs must be 16 bytes")
+    if len(role) > 20:
+        raise ValueError("Role cannot exceed 20 characters")
+
+    sql = load_sql("sql/group_members/create_new_group_member.sql")
+    params = (user_id, group_id, role)
+    cursor.execute(sql, params)
+
 class access_database:
     def __init__(self, host=None, user=None, password=None, database=None, port=None):
         self.host = host or os.getenv("DB_HOST", "localhost")
