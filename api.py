@@ -40,11 +40,14 @@ def signin():
     if request.method == "POST":
         email = request.form.get("email")
         password = request.form.get("password")
+        user = get_user(email, conn.cursor())
         authenticator = authenticator.authenticate(email, password)
         if authenticator:
+            session["user_id"] = user.user_ID  # Assuming user ID is the first column
             return redirect(url_for("dashboard"))
         else:
-            return render_template("signin.html")
+            return "Invalid credentials", 401
+    return render_template("signin.html")
         
 
 @app.route("/signout")

@@ -54,6 +54,13 @@ class access_database:
         except Error as e:
             print(e)
             return None
+        
+    def getuser(self, email: str, cursor):
+        sql = load_sql("sql/authentication/get_user.sql")
+        params = (email)
+        cursor.execute(sql, params)
+        result = cursor.fetchone()
+        return result #this returned result should be the userid
     def newuser(self, email: str, password: str):
         try:
             conn = self.connect()
