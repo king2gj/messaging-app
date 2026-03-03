@@ -138,6 +138,32 @@ def add_new_section(
     params = (group_id, section_id)
     cursor.execute(sql, params)
 
+def add_new_post(
+        post_id: bytes,
+        parent_post_id: bytes | None,
+        group_id: bytes,
+        user_id: bytes,
+        content: str,
+        is_comment: bool,
+        cursor) -> None:
+    for x in {post_id, group_id, user_id}:
+        if len(x) != 16:
+            raise ValueError("All IDs must be 16 bytes")
+    if is_comment:
+        if len(parent_post_id) != 16:
+            raise ValueError("All IDs must be 16 bytes")
+    if len(content) > 500:
+        raise ValueError("Content cannot exceed 500 characters")
+
+    if not is_comment:
+        sql = load_sql("sql/posts/create_new_post.sql")
+        params = (post_id, group_id, user_id, content)
+        cursor.execute(sql, params)
+    else:
+        sql = load_sql("sql/posts/create_new_comment.sql")
+        params = (post_id, parent_post_id, group_id, user_id, content)
+        cursor.execute(sql, params)
+
 def add_new_report(
         report_id: bytes,
         reporter_id: bytes,
