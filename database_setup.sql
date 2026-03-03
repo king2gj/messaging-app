@@ -94,6 +94,7 @@ CREATE TABLE posts (
   like_count      INT UNSIGNED NOT NULL DEFAULT 0,
   dislike_count   INT UNSIGNED NOT NULL DEFAULT 0,
   report_count    INT UNSIGNED NOT NULL DEFAULT 0,
+  content         VARCHAR(500) NOT NULL,
 
   CONSTRAINT fk_post__parent
     FOREIGN KEY (parent_post_id) REFERENCES posts(post_id)
