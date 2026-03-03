@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div id="sidebar" class="collapse d-md-block col-md-3">
+    <div class="card mb-4">
+      <div class="card-body">
+        <h5 class="card-title">Message Board (Web Name)</h5>
+      </div>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-body">
+        <h5 class="card-title">Dashboard</h5>
+      </div>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-body">
+        <h6 class="mb-3">Courses</h6>
+        <div class="list-group">
+          <button class="list-group-item list-group-item-action" type="button">CS 201</button>
+          <button class="list-group-item list-group-item-action" type="button">CS 4071</button>
+          <button class="list-group-item list-group-item-action" type="button">EECE 3093C</button>
+          <button class="list-group-item list-group-item-action" type="button">PSYC 1001</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <main class="col-md-9">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div class="d-flex align-items-center gap-2">
+        <button class="btn btn-sm btn-outline-secondary d-md-none" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar" aria-controls="sidebar" aria-expanded="false">Menu</button>
+        <h2 class="h3 text-muted mb-0">Dashboard</h2>
+      </div>
+    </div>
+
+    <section class="mb-5">
+      <h3 class="h5 text-muted mb-4">Articles</h3>
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="card h-100 card-hover">
+            <img src="{{ url_for('static', filename='images/article.svg') }}" class="card-img-top" alt="Goodbye">
+            <div class="card-body">
+              <h5 class="card-title">Goodbye, Crosley Tower</h5>
+              <p class="text-muted small">January 26, 2026</p>
+            </div>
+            <div class="card-footer bg-dark" style="height:18px"></div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card h-100 card-hover">
+            <img src="{{ url_for('static', filename='images/article.svg') }}" class="card-img-top" alt="Social">
+            <div class="card-body">
+              <h5 class="card-title">Social Media linked to student loneliness</h5>
+              <p class="text-muted small">February 20, 2026</p>
+            </div>
+            <div class="card-footer bg-dark" style="height:18px"></div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card h-100 card-hover">
+            <img src="{{ url_for('static', filename='images/article.svg') }}" class="card-img-top" alt="Career Fair">
+            <div class="card-body">
+              <h5 class="card-title">Career Fair!</h5>
+              <p class="text-muted small">February 14, 2026</p>
+            </div>
+            <div class="card-footer bg-dark" style="height:18px"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h3 class="h5 text-muted mb-3">Thread of the Day</h3>
+      <div class="card mb-3">
+        <div class="card-body">
+          <div class="d-flex align-items-start mb-2">
+            <img src="{{ url_for('static', filename='images/john.svg') }}" class="rounded-circle me-3" width="48" height="48" alt="avatar">
+            <div>
+              <strong>John Doe</strong>
+              <p class="mb-1">Comment Text</p>
+              <div class="text-muted small">0 replies - 5 likes</div>
+              <div class="mt-2">
+                <div class="btn-group btn-group-sm" role="group" aria-label="post actions">
+                  <button type="button" class="btn btn-outline-secondary">Like<span class="visually-hidden">like</span></button>
+                  <button type="button" class="btn btn-outline-secondary">Comment</button><span class="visually-hidden">comment</span></button>
+                  <button type="button" class="btn btn-outline-secondary">Share<span class="visually-hidden">share</span></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+{% endblock %}
