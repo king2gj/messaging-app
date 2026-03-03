@@ -60,8 +60,8 @@ class access_database:
         params = (email)
         cursor.execute(sql, params)
         result = cursor.fetchone()
-        return result #this returned result should be the userid
-    def newuser(self, email: str, password: str):
+        return result #this returned result should be the user object
+    def newuser(self, email: str, password: str, username: str):
         try:
             conn = self.connect()
             if conn is None:
