@@ -1,7 +1,13 @@
 import json
 import hashlib
+import database.py
+
 
 class Authenticator:
+
+    db = database.access_database()
+    conn = db.connect()
+
     def __init__(self):
         self.salt = "random_salt"
         self.user_data = None
@@ -32,7 +38,9 @@ class Authenticator:
         user_data = self.load_user_data()
         salted_password = password + self.salt
         hashed_password = hashlib.sha256(salted_password.encode()).hexdigest()
-        if username in user_data and user_data[username] == hashed_password:
+        goodauth = user_login(username, hashed_password, self.conn.cursor())
+        if goodauth:
             return True
-        else:
+        else:      
             return False
+        
