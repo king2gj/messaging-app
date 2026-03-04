@@ -30,17 +30,24 @@ def search():
 
 @app.route("/signup")
 def signup():
+    if request.method == "POST":
+        email = request.form.get("email")
+        password = request.form.get("password")
+        authenticator.save_user_data(email, password)
 
 @app.route("/signin", methods=["POST"])
 def signin():
     if request.method == "POST":
         email = request.form.get("email")
         password = request.form.get("password")
+        user = get_user(email, conn.cursor())
         authenticator = authenticator.authenticate(email, password)
         if authenticator:
+            session["user_id"] = user.user_ID  # Assuming user ID is the first column
             return redirect(url_for("dashboard"))
         else:
-            return render_template("signin.html")
+            return "Invalid credentials", 401
+    return render_template("signin.html")
         
 
 @app.route("/signout")
@@ -51,6 +58,9 @@ def account():
 
 @app.route("/update_account")
 def update_account():
+    if request.method == "POST":
+        access_database.updateuser(request.form.get("email"), request.form.get("password"))
+
 
 @app.route("/rep_user")
 def rep_user():
