@@ -164,6 +164,30 @@ def add_new_post(
         params = (post_id, parent_post_id, group_id, user_id, content)
         cursor.execute(sql, params)
 
+def add_like(
+        user_id: bytes,
+        post_id: bytes,
+        cursor) -> None:
+    for x in {user_id, post_id}:
+        if len(x) != 16:
+            raise ValueError("All IDs must be 16 bytes")
+
+    sql = load_sql("sql/liked_posts/create_new_liked_post.sql")
+    params = (user_id, post_id)
+    cursor.execute(sql, params)
+
+def add_dislike(
+        user_id: bytes,
+        post_id: bytes,
+        cursor) -> None:
+    for x in {user_id, post_id}:
+        if len(x) != 16:
+            raise ValueError("All IDs must be 16 bytes")
+
+    sql = load_sql("sql/disliked_posts/create_new_disliked_post.sql")
+    params = (user_id, post_id)
+    cursor.execute(sql, params)
+
 def add_new_report(
         report_id: bytes,
         reporter_id: bytes,
