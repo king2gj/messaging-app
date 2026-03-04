@@ -244,6 +244,36 @@ def add_dislike(
     params = (post_id,)
     cursor.execute(sql, params)
 
+def add_file_to_post(
+        media_id: bytes,
+        post_id: bytes,
+        file_path: str,
+        cursor) -> None:
+    for x in {media_id, post_id}:
+        if len(x) != 16:
+            raise ValueError("All IDs must be 16 bytes")
+    if len(file_path) > 200:
+        raise ValueError("File path cannot exceed 200 characters")
+
+    sql = load_sql("sql/media/create_new_post_file.sql")
+    params = (media_id, post_id, file_path)
+    cursor.execute(sql, params)
+
+def add_profile_picture(
+        media_id: bytes,
+        user_id: bytes,
+        file_path: str,
+        cursor) -> None:
+    for x in {media_id, user_id}:
+        if len(x) != 16:
+            raise ValueError("All IDs must be 16 bytes")
+    if len(file_path) > 200:
+        raise ValueError("File path cannot exceed 200 characters")
+
+    sql = load_sql("sql/media/create_new_profile_picture.sql")
+    params = (media_id, user_id, file_path)
+    cursor.execute(sql, params)
+
 class access_database:
     def __init__(self, host=None, user=None, password=None, database=None, port=None):
         self.host = host or os.getenv("DB_HOST", "localhost")

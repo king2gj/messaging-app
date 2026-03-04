@@ -113,8 +113,7 @@ CREATE TABLE media (
   media_id   BINARY(16) PRIMARY KEY,
   user_id    BINARY(16) NULL,
   post_id    BINARY(16) NULL,
-  file_name  VARCHAR(100) NOT NULL,
-  content    MEDIUMBLOB NOT NULL,
+  file_path  VARCHAR(200) NOT NULL,
 
   CONSTRAINT fk_media__user
     FOREIGN KEY (user_id) REFERENCES users(user_id)
