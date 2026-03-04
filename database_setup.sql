@@ -90,7 +90,7 @@ CREATE TABLE posts (
   group_id        BINARY(16) NOT NULL,
   user_id         BINARY(16) NOT NULL,
   time_posted     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  comment_count   INT UNSIGNED NULL,
+  comment_count   INT UNSIGNED NOT NULL DEFAULT 0,
   like_count      INT UNSIGNED NOT NULL DEFAULT 0,
   dislike_count   INT UNSIGNED NOT NULL DEFAULT 0,
   report_count    INT UNSIGNED NOT NULL DEFAULT 0,

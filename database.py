@@ -25,6 +25,7 @@ def get_user_id_by_username(
     (user_id,) = cursor.fetchone()
     return user_id
 
+# FOR INTERNAL USE ONLY. USE GROUP_ID IN PYTHON CODE
 def get_college_id_by_name(
         name: str,
         cursor) -> bytes:
@@ -35,6 +36,7 @@ def get_college_id_by_name(
     (college_id,) = cursor.fetchone()
     return college_id
 
+# FOR INTERNAL USE ONLY. USE GROUP_ID IN PYTHON CODE
 def get_course_id_by_course_code(
         course_code: str,
         cursor) -> bytes:
@@ -140,52 +142,39 @@ def add_new_section(
 
 def add_new_post(
         post_id: bytes,
-        parent_post_id: bytes | None,
         group_id: bytes,
         user_id: bytes,
         content: str,
-        is_comment: bool,
         cursor) -> None:
     for x in {post_id, group_id, user_id}:
         if len(x) != 16:
             raise ValueError("All IDs must be 16 bytes")
-    if is_comment:
-        if len(parent_post_id) != 16:
+    if len(content) > 500:
+        raise ValueError("Content cannot exceed 500 characters")
+
+    sql = load_sql("sql/posts/create_new_post.sql")
+    params = (post_id, group_id, user_id, content)
+    cursor.execute(sql, params)
+
+def add_new_comment(
+        post_id: bytes,
+        parent_post_id: bytes,
+        group_id: bytes,
+        user_id: bytes,
+        content: bytes,
+        cursor) -> None:
+    for x in {post_id, parent_post_id, group_id, user_id}:
+        if len(x) != 16:
             raise ValueError("All IDs must be 16 bytes")
     if len(content) > 500:
         raise ValueError("Content cannot exceed 500 characters")
 
-    if not is_comment:
-        sql = load_sql("sql/posts/create_new_post.sql")
-        params = (post_id, group_id, user_id, content)
-        cursor.execute(sql, params)
-    else:
-        sql = load_sql("sql/posts/create_new_comment.sql")
-        params = (post_id, parent_post_id, group_id, user_id, content)
-        cursor.execute(sql, params)
-
-def add_like(
-        user_id: bytes,
-        post_id: bytes,
-        cursor) -> None:
-    for x in {user_id, post_id}:
-        if len(x) != 16:
-            raise ValueError("All IDs must be 16 bytes")
-
-    sql = load_sql("sql/liked_posts/create_new_liked_post.sql")
-    params = (user_id, post_id)
+    sql = load_sql("sql/posts/create_new_comment.sql")
+    params = (post_id, parent_post_id, group_id, user_id, content)
     cursor.execute(sql, params)
 
-def add_dislike(
-        user_id: bytes,
-        post_id: bytes,
-        cursor) -> None:
-    for x in {user_id, post_id}:
-        if len(x) != 16:
-            raise ValueError("All IDs must be 16 bytes")
-
-    sql = load_sql("sql/disliked_posts/create_new_disliked_post.sql")
-    params = (user_id, post_id)
+    sql = load_sql("sql/posts/increment_comment_count.sql")
+    params = (parent_post_id,)
     cursor.execute(sql, params)
 
 def add_new_report(
@@ -221,6 +210,38 @@ def add_user_to_group(
 
     sql = load_sql("sql/group_members/create_new_group_member.sql")
     params = (user_id, group_id, role)
+    cursor.execute(sql, params)
+
+def add_like(
+        user_id: bytes,
+        post_id: bytes,
+        cursor) -> None:
+    for x in {user_id, post_id}:
+        if len(x) != 16:
+            raise ValueError("All IDs must be 16 bytes")
+
+    sql = load_sql("sql/liked_posts/create_new_liked_post.sql")
+    params = (user_id, post_id)
+    cursor.execute(sql, params)
+
+    sql = load_sql("sql/posts/increment_like_count.sql")
+    params = (post_id,)
+    cursor.execute(sql, params)
+
+def add_dislike(
+        user_id: bytes,
+        post_id: bytes,
+        cursor) -> None:
+    for x in {user_id, post_id}:
+        if len(x) != 16:
+            raise ValueError("All IDs must be 16 bytes")
+
+    sql = load_sql("sql/disliked_posts/create_new_disliked_post.sql")
+    params = (user_id, post_id)
+    cursor.execute(sql, params)
+
+    sql = load_sql("sql/posts/increment_dislike_count.sql")
+    params = (post_id,)
     cursor.execute(sql, params)
 
 class access_database:
