@@ -2,14 +2,13 @@ CREATE DATABASE message_board;
 USE message_board;
 
 CREATE TABLE users (
-  user_id      BINARY(16) PRIMARY KEY,
-  username     VARCHAR(32) NOT NULL UNIQUE,
-  first_name   VARCHAR(32) NOT NULL,
-  last_name    VARCHAR(32) NOT NULL,
-  email        VARCHAR(32) NOT NULL UNIQUE,
-  bio          VARCHAR(160) NOT NULL,
-  is_admin     BOOLEAN NOT NULL,
-  time_joined  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+  user_id     BINARY(16) PRIMARY KEY,
+  username    VARCHAR(32) NOT NULL UNIQUE,
+  email       VARCHAR(32) NOT NULL UNIQUE,
+  bio         VARCHAR(160) NOT NULL,
+  is_admin    BOOLEAN NOT NULL,
+  created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  post_count  INT NOT NULL DEFAULT 0
 );
 
 CREATE TABLE auth (
@@ -23,15 +22,21 @@ CREATE TABLE auth (
 );
 
 CREATE TABLE colleges (
-  college_id  BINARY(16) PRIMARY KEY,
-  name        VARCHAR(100) NOT NULL UNIQUE
+  college_id    BINARY(16) PRIMARY KEY,
+  name          VARCHAR(100) NOT NULL UNIQUE,
+  created_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  description   VARCHAR(200) NOT NULL,
+  course_count  INT NOT NULL DEFAULT 0
 );
 
 CREATE TABLE courses (
-  course_id    BINARY(16) PRIMARY KEY,
-  college_id   BINARY(16) NOT NULL,
-  course_code  VARCHAR(12) NOT NULL UNIQUE,
-  name         VARCHAR(100) NOT NULL,
+  course_id      BINARY(16) PRIMARY KEY,
+  college_id     BINARY(16) NOT NULL,
+  course_code    VARCHAR(12) NOT NULL UNIQUE,
+  name           VARCHAR(100) NOT NULL,
+  description    VARCHAR(200) NOT NULL,
+  created_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  section_count  INT NOT NULL,
 
   CONSTRAINT fk_course__college
     FOREIGN KEY (college_id) REFERENCES colleges(college_id)
@@ -42,6 +47,8 @@ CREATE TABLE sections (
   section_id      BINARY(16) PRIMARY KEY,
   course_id       BINARY(16) NOT NULL,
   section_number  INT UNSIGNED NOT NULL,
+  created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  description     VARCHAR(200) NOT NULL,
 
   CONSTRAINT fk_section__course
     FOREIGN KEY (course_id) REFERENCES courses(course_id)
@@ -54,6 +61,7 @@ CREATE TABLE message_groups (
   college_id   BINARY(16) NULL,
   course_id    BINARY(16) NULL,
   section_id   BINARY(16) NULL,
+  post_count   INT NOT NULL DEFAULT 0,
 
   CONSTRAINT fk_message_group__college
     FOREIGN KEY (college_id) REFERENCES colleges(college_id)
@@ -85,16 +93,17 @@ CREATE TABLE group_members (
 );
 
 CREATE TABLE posts (
-  post_id         BINARY(16) PRIMARY KEY,
-  parent_post_id  BINARY(16) NULL,
-  group_id        BINARY(16) NOT NULL,
-  user_id         BINARY(16) NOT NULL,
-  time_posted     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  comment_count   INT UNSIGNED NOT NULL DEFAULT 0,
-  like_count      INT UNSIGNED NOT NULL DEFAULT 0,
-  dislike_count   INT UNSIGNED NOT NULL DEFAULT 0,
-  report_count    INT UNSIGNED NOT NULL DEFAULT 0,
-  content         VARCHAR(500) NOT NULL,
+  post_id          BINARY(16) PRIMARY KEY,
+  parent_post_id   BINARY(16) NULL,
+  group_id         BINARY(16) NOT NULL,
+  user_id          BINARY(16) NOT NULL,
+  created_at       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  comment_count    INT UNSIGNED NOT NULL DEFAULT 0,
+  like_count       INT UNSIGNED NOT NULL DEFAULT 0,
+  dislike_count    INT UNSIGNED NOT NULL DEFAULT 0,
+  report_count     INT UNSIGNED NOT NULL DEFAULT 0,
+  content          VARCHAR(500) NOT NULL,
+  is_announcement  BOOLEAN NOT NULL,
 
   CONSTRAINT fk_post__parent
     FOREIGN KEY (parent_post_id) REFERENCES posts(post_id)
@@ -158,7 +167,7 @@ CREATE TABLE reports (
   report_id       BINARY(16) PRIMARY KEY,
   reporter_id     BINARY(16) NOT NULL,
   post_id         BINARY(16) NOT NULL,
-  report_time     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   report_content  VARCHAR(200) NOT NULL,
 
   CONSTRAINT fk_report__user
