@@ -1,3 +1,3 @@
 SELECT user_id
 FROM users
-WHERE username = %s
+WHERE email = %s

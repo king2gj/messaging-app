@@ -15,11 +15,11 @@ def load_sql(path: str | Path) -> str:
     path = Path(path)
     return path.read_text(encoding="utf-8")
 
-def get_user_id_by_username(
-        username: str,
+def get_user_id_by_email(
+        email: str,
         cursor) -> bytes:
-    sql = load_sql("sql/users/get_id_by_username.sql")
-    params = (username,)
+    sql = load_sql("sql/users/get_id_by_email.sql")
+    params = (email,)
     cursor.execute(sql, params)
 
     (user_id,) = cursor.fetchone()

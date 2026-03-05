@@ -4,7 +4,7 @@ USE message_board;
 
 CREATE TABLE users (
   user_id     BINARY(16) PRIMARY KEY,
-  username    VARCHAR(32) NOT NULL UNIQUE,
+  username    VARCHAR(32) NOT NULL,
   email       VARCHAR(32) NOT NULL UNIQUE,
   bio         VARCHAR(160) NOT NULL,
   is_admin    BOOLEAN NOT NULL,
