@@ -1,3 +1,4 @@
+DROP DATABASE message_board;
 CREATE DATABASE message_board;
 USE message_board;
 
@@ -56,12 +57,13 @@ CREATE TABLE sections (
 );
 
 CREATE TABLE message_groups (
-  group_id     BINARY(16) PRIMARY KEY,
-  group_scope  TINYINT UNSIGNED NOT NULL,
-  college_id   BINARY(16) NULL,
-  course_id    BINARY(16) NULL,
-  section_id   BINARY(16) NULL,
-  post_count   INT NOT NULL DEFAULT 0,
+  group_id      BINARY(16) PRIMARY KEY,
+  group_scope   TINYINT UNSIGNED NOT NULL,
+  college_id    BINARY(16) NULL,
+  course_id     BINARY(16) NULL,
+  section_id    BINARY(16) NULL,
+  post_count    INT NOT NULL DEFAULT 0,
+  member_count  INT NOT NULL DEFAULT 0,
 
   CONSTRAINT fk_message_group__college
     FOREIGN KEY (college_id) REFERENCES colleges(college_id)
