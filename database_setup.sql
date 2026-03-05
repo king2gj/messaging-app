@@ -23,9 +23,9 @@ CREATE TABLE auth (
 );
 
 CREATE TABLE colleges (
-    college_id  BINARY(16) PRIMARY KEY,
-    name        VARCHAR(100) NOT NULL UNIQUE
-)
+  college_id  BINARY(16) PRIMARY KEY,
+  name        VARCHAR(100) NOT NULL UNIQUE
+);
 
 CREATE TABLE courses (
   course_id    BINARY(16) PRIMARY KEY,
