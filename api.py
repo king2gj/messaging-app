@@ -16,6 +16,7 @@ def dashboard():
         user_id=session['user_id']
     )
 
+
 @app.route("/")
 def index(name=None):
     return render_template('base_post.html', person=name)
@@ -27,8 +28,12 @@ def signup():
         email = request.form.get("email")
         username = request.form.get("username")
         password = request.form.get("password")
-        authenticator.save_user_data(email, username, password)
-        return redirect(url_for("signin"))
+        saved = authenticator.save_user_data(email, username, password)
+        if saved:
+            return redirect(url_for("signin"))
+        else:
+            return "Error saving user data", 500
+    return render_template("signup.html")
 
 @app.route("/signin", methods=["POST"])
 def signin():
@@ -78,8 +83,15 @@ def rep_user():
 @app.route("/del_user")
 def del_user():
 
-@app.route("/view_post")
-def view_post():  
+@app.route("/view_post/<int:post_id>", methods=["GET"])
+def view_post(post_id):  
+    post = db.get_post(post_id, conn.cursor())
+    if post:
+        return render_template("view_post.html", post=post)
+    else:
+        return "Post not found", 404
+    
+    
 
 @app.route("/post") 
 def post():
@@ -90,26 +102,20 @@ def del_post():
 @app.route("/rep_post")
 def rep_post():
 
-@app.route("/edit_post")
-def edit_post():
+@app.route("/edit_post/<int:post_id>", methods=["GET", "POST"])
+def edit_post(post_id):
+    if 'user_id' not in session:
+        return redirect(url_for('signin'))
+
+    if request.method == "POST":
+        db.get_post(post_id, conn.cursor())
+        if post.author_id != session['user_id']:
+            return "Unauthorized", 403
+        else:
+            title = request.form.get("title")
+            content = request.form.get("content")
+            db.update_post(post_id, title, content, conn.cursor())
+            return redirect(url_for("view_post", post_id=post_id))
 
 @app.route("/lock_post")
 def lock_post():
-
-@app.route("/view_thread")
-def view_thread():
-
-@app.route("/thread")
-def thread():
-
-@app.route("/del_thread")
-def del_thread():
-
-@app.route("/rep_thread")
-def rep_thread():
-
-@app.route("/edit_thread")
-def edit_thread():
-
-@app.route("/lock_thread")
-def lock_thread():
