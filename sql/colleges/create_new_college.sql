@@ -1,2 +1,2 @@
-INSERT INTO colleges (college_id, name)
-VALUES (%s, %s)
+INSERT INTO colleges (college_id, name, description)
+VALUES (%s, %s, %s)

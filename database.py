@@ -50,8 +50,6 @@ def get_course_id_by_course_code(
 def add_new_user(
         user_id: bytes,
         username: str,
-        first_name: str,
-        last_name: str,
         email:str,
         bio: str,
         is_admin: bool,
@@ -60,9 +58,9 @@ def add_new_user(
         cursor) -> None:
     if len(user_id) != 16:
         raise ValueError("ID must be 16 bytes")
-    for x in {username, first_name, last_name, email}:
+    for x in {username, email}:
         if len(x) > 32:
-            raise ValueError("Username, first name, last name, and email cannot exceed 32 characters")
+            raise ValueError("Username and email cannot exceed 32 characters")
     if len(bio) > 160:
         raise ValueError("Bio cannot exceed 160 characters")
     if len(hashed_password) != 32:
@@ -71,7 +69,7 @@ def add_new_user(
         raise ValueError("Salt code cannot exceed 32 characters")
 
     sql = load_sql("sql/users/create_new_user.sql")
-    params = (user_id, username, first_name, last_name, email, bio, is_admin)
+    params = (user_id, username, email, bio, is_admin)
     cursor.execute(sql, params)
 
     sql = load_sql("sql/auth/create_new_auth.sql")
@@ -81,16 +79,19 @@ def add_new_user(
 def add_new_college(
         group_id: bytes,
         name: str,
+        description: str,
         cursor) -> None:
     if len(group_id) != 16:
         raise ValueError("ID must be 16 bytes")
     if len(name) > 100:
         raise ValueError("College name cannot exceed 100 characters")
+    if len(description) > 200:
+        raise ValueError("Description cannot exceed 200 characters")
 
     college_id = uuid.uuid4().bytes
 
     sql = load_sql("sql/colleges/create_new_college.sql")
-    params = (college_id, name)
+    params = (college_id, name, description)
     cursor.execute(sql, params)
 
     sql = load_sql("sql/message_groups/create_new_college_group.sql")
@@ -101,6 +102,7 @@ def add_new_course(
         group_id: bytes,
         course_code: str,
         name: str,
+        description: str,
         offering_college_name: str,
         cursor) -> None:
     if len(group_id) != 16:
@@ -109,35 +111,48 @@ def add_new_course(
         raise ValueError("Course code cannot exceed 12 characters")
     if len(name) > 100:
         raise ValueError("Course name cannot exceed 100 characters")
+    if len(description) > 200:
+        raise ValueError("Description cannot exceed 200 characters")
 
     course_id = uuid.uuid4().bytes
     college_id = get_college_id_by_name(offering_college_name, cursor)
 
     sql = load_sql("sql/courses/create_new_course.sql")
-    params = (course_id, college_id, course_code, name)
+    params = (course_id, college_id, course_code, name, description)
     cursor.execute(sql, params)
 
     sql = load_sql("sql/message_groups/create_new_course_group.sql")
     params = (group_id, course_id)
     cursor.execute(sql, params)
 
+    sql = load_sql("sql/colleges/increment_course_count.sql")
+    params = (college_id,)
+    cursor.execute(sql, params)
+
 def add_new_section(
         group_id: bytes,
         course_code: str,
         section_number: int,
+        description: str,
         cursor) -> None:
     if len(group_id) != 16:
         raise ValueError("ID must be 16 bytes")
+    if len(description) > 200:
+        raise ValueError("Description cannot exceed 200 characters")
 
     section_id = uuid.uuid4().bytes
     course_id = get_course_id_by_course_code(course_code, cursor)
 
     sql = load_sql("sql/sections/create_new_section.sql")
-    params = (section_id, course_id, section_number)
+    params = (section_id, course_id, section_number, description)
     cursor.execute(sql, params)
 
     sql = load_sql("sql/message_groups/create_new_section_group.sql")
     params = (group_id, section_id)
+    cursor.execute(sql, params)
+
+    sql = load_sql("sql/courses/increment_section_count.sql")
+    params = (course_id,)
     cursor.execute(sql, params)
 
 def add_new_post(
@@ -145,6 +160,7 @@ def add_new_post(
         group_id: bytes,
         user_id: bytes,
         content: str,
+        is_announcement: bool,
         cursor) -> None:
     for x in {post_id, group_id, user_id}:
         if len(x) != 16:
@@ -153,7 +169,15 @@ def add_new_post(
         raise ValueError("Content cannot exceed 500 characters")
 
     sql = load_sql("sql/posts/create_new_post.sql")
-    params = (post_id, group_id, user_id, content)
+    params = (post_id, group_id, user_id, content, is_announcement)
+    cursor.execute(sql, params)
+
+    sql = load_sql("sql/users/increment_post_count")
+    params = (user_id,)
+    cursor.execute(sql, params)
+
+    sql = load_sql("sql/message_groups/increment_post_count")
+    params = (group_id,)
     cursor.execute(sql, params)
 
 def add_new_comment(
@@ -210,6 +234,10 @@ def add_user_to_group(
 
     sql = load_sql("sql/group_members/create_new_group_member.sql")
     params = (user_id, group_id, role)
+    cursor.execute(sql, params)
+
+    sql = load_sql("sql/message_groups/increment_member_count.sql")
+    params = (group_id,)
     cursor.execute(sql, params)
 
 def add_like(

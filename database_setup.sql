@@ -25,8 +25,8 @@ CREATE TABLE auth (
 CREATE TABLE colleges (
   college_id    BINARY(16) PRIMARY KEY,
   name          VARCHAR(100) NOT NULL UNIQUE,
-  created_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   description   VARCHAR(200) NOT NULL,
+  created_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   course_count  INT NOT NULL DEFAULT 0
 );
 
@@ -37,7 +37,7 @@ CREATE TABLE courses (
   name           VARCHAR(100) NOT NULL,
   description    VARCHAR(200) NOT NULL,
   created_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  section_count  INT NOT NULL,
+  section_count  INT NOT NULL DEFAULT 0,
 
   CONSTRAINT fk_course__college
     FOREIGN KEY (college_id) REFERENCES colleges(college_id)
@@ -48,8 +48,8 @@ CREATE TABLE sections (
   section_id      BINARY(16) PRIMARY KEY,
   course_id       BINARY(16) NOT NULL,
   section_number  INT UNSIGNED NOT NULL,
-  created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   description     VARCHAR(200) NOT NULL,
+  created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
   CONSTRAINT fk_section__course
     FOREIGN KEY (course_id) REFERENCES courses(course_id)
@@ -99,13 +99,13 @@ CREATE TABLE posts (
   parent_post_id   BINARY(16) NULL,
   group_id         BINARY(16) NOT NULL,
   user_id          BINARY(16) NOT NULL,
+  content          VARCHAR(500) NOT NULL,
+  is_announcement  BOOLEAN NOT NULL DEFAULT FALSE,
   created_at       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   comment_count    INT UNSIGNED NOT NULL DEFAULT 0,
   like_count       INT UNSIGNED NOT NULL DEFAULT 0,
   dislike_count    INT UNSIGNED NOT NULL DEFAULT 0,
   report_count     INT UNSIGNED NOT NULL DEFAULT 0,
-  content          VARCHAR(500) NOT NULL,
-  is_announcement  BOOLEAN NOT NULL,
 
   CONSTRAINT fk_post__parent
     FOREIGN KEY (parent_post_id) REFERENCES posts(post_id)
@@ -169,8 +169,8 @@ CREATE TABLE reports (
   report_id       BINARY(16) PRIMARY KEY,
   reporter_id     BINARY(16) NOT NULL,
   post_id         BINARY(16) NOT NULL,
-  created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   report_content  VARCHAR(200) NOT NULL,
+  created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
   CONSTRAINT fk_report__user
     FOREIGN KEY (reporter_id) REFERENCES users(user_id)
