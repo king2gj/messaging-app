@@ -2,17 +2,53 @@ import uuid
 import datetime
 
 class standard_message:
-    def __init__(self, message, creator_ID, thread_ID):
-        self.message_ID = uuid.uuid4()
-        self.date_created = datetime.datetime.now()
-        self.thread_ID = thread_ID
-        self.message = message
-        self.creator_ID = creator_ID
-        self.likes = 0
-        self.dislikes = 0
-        self.priority = 0
-        self.report_count = 0
-        self.report_flag = False
+    def __init__(self, **kwargs):
+        if "message_ID" in kwargs:
+            self.message_ID = kwargs["message_ID"]
+        else:
+            self.message_ID = uuid.uuid4()
+        
+        if "parent_ID" in kwargs:
+            self.parent_ID = kwargs["parent_ID"]
+        else:
+            self.parent_ID = None
+
+        if "date_created" in kwargs:
+            self.date_created = kwargs["date_created"]
+        else:
+            self.date_created = datetime.datetime.now()
+
+        if "message" in kwargs:
+            self.message = kwargs["message"]
+        else:
+            self.message = None
+
+        if "creator_ID" in kwargs:
+            self.creator_ID = kwargs["creator_ID"]
+        else:
+            self.creator_ID = None
+
+        if "likes" in kwargs:
+            self.likes = kwargs["likes"]
+        else:
+            self.likes = 0
+
+        if "dislikes" in kwargs:
+            self.dislikes = kwargs["dislikes"]
+        else:
+            self.dislikes = 0
+
+        if "report_count" in kwargs:
+            self.report_count = kwargs["report_count"]
+            self.report_flag = True
+        else:
+            self.report_count = 0
+            self.report_flag = False
+
+        if "is_locked" in kwargs:
+            self.is_locked = kwargs["is_locked"]
+        else:
+            self.is_locked = True if self.report_count >= 3 else False
 
     def edit(self, new_message, user):
         if user == self.creator_ID or user.is_admin:
@@ -41,27 +77,50 @@ class standard_message:
         else:
             return "You cannot report your own message."
 
-    def delete(self, user):
-        if user == self.creator_ID or user.is_admin:
-            self.message = "This message has been deleted."
-            self.likes = None
-            self.creator_ID = None
-        else:
-            return "You cannot delete this message."
-
     def __str__(self):
-        return f"{self.message} - {self.creator_ID} ({self.likes} likes, {self.dislikes} dislikes)"
+        if self.is_locked:
+            return "This message has been locked."
+        else:
+            return f"{self.message} - {self.creator_ID} ({self.likes} likes, {self.dislikes} dislikes)"
     
 class announcement:
-    def __init__(self, message, creator_ID, thread_ID):
-        self.message_ID = uuid.uuid4()
-        self.date_created = datetime.datetime.now()
-        self.thread_ID = thread_ID
-        self.message = message
-        self.creator_ID = creator_ID
-        self.priority = 1
-        self.report_count = 0
-        self.report_flag = False
+    def __init__(self, **kwargs):
+        if "message_ID" in kwargs:
+            self.message_ID = kwargs["message_ID"]
+        else:
+            self.message_ID = uuid.uuid4()
+        
+        if "parent_ID" in kwargs:
+            self.parent_ID = kwargs["parent_ID"]
+        else:
+            self.parent_ID = None
+
+        if "date_created" in kwargs:
+            self.date_created = kwargs["date_created"]
+        else:
+            self.date_created = datetime.datetime.now()
+
+        if "message" in kwargs:
+            self.message = kwargs["message"]
+        else:
+            self.message = None
+
+        if "creator_ID" in kwargs:
+            self.creator_ID = kwargs["creator_ID"]
+        else:
+            self.creator_ID = None
+
+        if "report_count" in kwargs:
+            self.report_count = kwargs["report_count"]
+            self.report_flag = True if self.report_count > 0 else False
+        else:
+            self.report_count = 0
+            self.report_flag = False
+
+        if "is_locked" in kwargs:
+            self.is_locked = kwargs["is_locked"]
+        else:
+            self.is_locked = True if self.report_count >= 3 else False
 
     def edit(self, new_message, user):
         if user == self.creator or user.is_admin:
@@ -82,15 +141,11 @@ class announcement:
         else:
             return "You cannot report your own announcement."
 
-    def delete(self, user):
-        if user == self.creator_ID or user.is_admin:
-            self.message = "This announcement has been deleted."
-            self.creator_ID = None
-        else:
-            return "You cannot delete this announcement."
-
     def __str__(self):
-        return f"{self.message} - {self.creator_ID}"
+        if self.is_locked:
+            return "This announcement has been locked."
+        else:
+            return f"{self.message} - {self.creator_ID}"
 
 class message_factory:
     @staticmethod
