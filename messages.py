@@ -1,7 +1,7 @@
 import uuid
 import datetime
 
-class standard_message:
+class Message:
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
             setattr(self, key, value)
@@ -69,7 +69,7 @@ class standard_message:
         else:
             return f"{self.message} - {self.creator_ID} ({self.likes} likes, {self.dislikes} dislikes)"
     
-class announcement:
+class Announcement:
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
             setattr(self, key, value)
@@ -132,9 +132,9 @@ class announcement:
 class message_factory:
     @staticmethod
     def create_message(message_type, message, creator_ID, parent_ID):
-        if message_type == "standard":
-            return standard_message(message, creator_ID, parent_ID)
+        if message_type == "message":
+            return Message(message, creator_ID, parent_ID)
         elif message_type == "announcement":
-            return announcement(message, creator_ID, parent_ID)
+            return Announcement(message, creator_ID, parent_ID)
         else:
             raise ValueError("Invalid message type")
