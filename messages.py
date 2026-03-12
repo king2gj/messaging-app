@@ -3,53 +3,39 @@ import datetime
 
 class standard_message:
     def __init__(self, **kwargs):
-        if "message_ID" in kwargs:
-            self.message_ID = kwargs["message_ID"]
-        else:
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
+        if not hasattr(self, "message_ID"):
             self.message_ID = uuid.uuid4()
-        
-        if "parent_ID" in kwargs:
-            self.parent_ID = kwargs["parent_ID"]
-        else:
+
+        if not hasattr(self, "parent_ID"):
             self.parent_ID = None
 
-        if "date_created" in kwargs:
-            self.date_created = kwargs["date_created"]
-        else:
+        if not hasattr(self, "date_created"):
             self.date_created = datetime.datetime.now()
 
-        if "message" in kwargs:
-            self.message = kwargs["message"]
-        else:
+        if not hasattr(self, "message"):
             self.message = None
 
-        if "creator_ID" in kwargs:
-            self.creator_ID = kwargs["creator_ID"]
-        else:
+        if not hasattr(self, "creator_ID"):
             self.creator_ID = None
 
-        if "likes" in kwargs:
-            self.likes = kwargs["likes"]
-        else:
+        if not hasattr(self, "likes"):
             self.likes = 0
 
-        if "dislikes" in kwargs:
-            self.dislikes = kwargs["dislikes"]
-        else:
+        if not hasattr(self, "dislikes"):
             self.dislikes = 0
 
-        if "report_count" in kwargs:
-            self.report_count = kwargs["report_count"]
-            self.report_flag = True
-        else:
+        if not hasattr(self, "report_count"):
             self.report_count = 0
-            self.report_flag = False
+            
+        self.report_flag = False if self.report_count == 0 else True
 
-        if "is_locked" in kwargs:
-            self.is_locked = kwargs["is_locked"]
-        else:
-            self.is_locked = True if self.report_count >= 3 else False
+       
+        self.is_locked = True if self.report_count >= 3 else False
 
+        
     def edit(self, new_message, user):
         if user == self.creator_ID or user.is_admin:
             self.message = new_message
@@ -85,42 +71,38 @@ class standard_message:
     
 class announcement:
     def __init__(self, **kwargs):
-        if "message_ID" in kwargs:
-            self.message_ID = kwargs["message_ID"]
-        else:
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
+        if not hasattr(self, "message_ID"):
             self.message_ID = uuid.uuid4()
-        
-        if "parent_ID" in kwargs:
-            self.parent_ID = kwargs["parent_ID"]
-        else:
+
+        if not hasattr(self, "parent_ID"):
             self.parent_ID = None
 
-        if "date_created" in kwargs:
-            self.date_created = kwargs["date_created"]
-        else:
+        if not hasattr(self, "date_created"):
             self.date_created = datetime.datetime.now()
 
-        if "message" in kwargs:
-            self.message = kwargs["message"]
-        else:
+        if not hasattr(self, "message"):
             self.message = None
 
-        if "creator_ID" in kwargs:
-            self.creator_ID = kwargs["creator_ID"]
-        else:
+        if not hasattr(self, "creator_ID"):
             self.creator_ID = None
 
-        if "report_count" in kwargs:
-            self.report_count = kwargs["report_count"]
-            self.report_flag = True if self.report_count > 0 else False
-        else:
-            self.report_count = 0
-            self.report_flag = False
+        if not hasattr(self, "likes"):
+            self.likes = 0
 
-        if "is_locked" in kwargs:
-            self.is_locked = kwargs["is_locked"]
-        else:
-            self.is_locked = True if self.report_count >= 3 else False
+        if not hasattr(self, "dislikes"):
+            self.dislikes = 0
+
+        if not hasattr(self, "report_count"):
+            self.report_count = 0
+            
+        self.report_flag = False if self.report_count == 0 else True
+
+       
+        self.is_locked = True if self.report_count >= 3 else False
+
 
     def edit(self, new_message, user):
         if user == self.creator or user.is_admin:
@@ -149,11 +131,10 @@ class announcement:
 
 class message_factory:
     @staticmethod
-    def create_message(message_type, message, creator_ID, thread_ID):
+    def create_message(message_type, message, creator_ID, parent_ID):
         if message_type == "standard":
-            return standard_message(message, creator_ID, thread_ID)
+            return standard_message(message, creator_ID, parent_ID)
         elif message_type == "announcement":
-            return announcement(message, creator_ID, thread_ID)
+            return announcement(message, creator_ID, parent_ID)
         else:
             raise ValueError("Invalid message type")
-
