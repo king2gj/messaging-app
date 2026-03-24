@@ -18,13 +18,13 @@
           <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
               <li class="nav-item">
-              <a class="nav-link" href="#">Home</a>
+              <a class="nav-link" href="home.html">Home</a>
               </li>
               <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="#">Accounts</a>
+              <a class="nav-link active" aria-current="page" href="account.html">Accounts</a>
               </li>
               <li class="nav-item">
-              <a class="nav-link" href="#">Threads</a>
+              <a class="nav-link" href="view_post.html">Posts</a>
               </li>
           </ul>
           <form class="d-flex">
@@ -43,22 +43,22 @@
           <form action="#" method="post">
             <div class="mb-3">
               <label for="name" class="form-label">Name</label>
-              <input id="name" name="name" type="text" class="form-control" value="John Doe">
+              <input id="name" name="name" type="text" class="form-control" value="{{ name }}">
             </div>
 
             <div class="mb-3">
               <label for="email" class="form-label">Email</label>
-              <input id="email" name="email" type="email" class="form-control" value="john@example.com">
+              <input id="email" name="email" type="email" class="form-control" value="{{ email }} ">
             </div>
 
             <div class="mb-3">
               <label for="password" class="form-label">Password</label>
-              <input id="password" name="password" type="password" class="form-control" value="password123">
+              <input id="password" name="password" type="password" class="form-control" value="{{ password }}">
             </div>
 
             <div class="mb-3">
               <label for="bio" class="form-label">Bio</label>
-              <textarea id="bio" name="bio" class="form-control" rows="5">Hi, I'm John. This is a short bio.</textarea>
+              <textarea id="bio" name="bio" class="form-control" rows="5">{{ bio }}</textarea>
             </div>
 
             <div class="d-flex justify-content-end gap-2">
