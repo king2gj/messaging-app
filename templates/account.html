@@ -20,13 +20,13 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item">
-        <a class="nav-link" href="#">Home</a>
+        <a class="nav-link" href="home.html">Home</a>
         </li>
         <li class="nav-item">
-        <a class="nav-link active" aria-current="page" href="#">Accounts</a>
+        <a class="nav-link active" aria-current="page" href="account.html">Accounts</a>
         </li>
             <li class="nav-item">
-            <a class="nav-link" href="#">Threads</a>
+            <a class="nav-link" href="view_post.html">Posts</a>
             </li>
         </ul>
         <form class="d-flex">
@@ -44,23 +44,26 @@
             <div class="d-flex align-items-center mb-3">
               <img src="https://via.placeholder.com/96" alt="User avatar" class="profile-avatar me-3">
               <div>
-                <h2 id="profile-name" class="mb-0">John Doe</h2>
-                <p id="profile-email" class="text-muted mb-0">john@example.com</p>
+                <h2 id="profile-name" class="mb-0">{{ name }}</h2>
+                <p id="profile-email" class="text-muted mb-0">{{ email }}</p>
               </div>
             </div>
 
             <div class="mb-3">
               <label class="form-label">Password</label>
-              <input type="password" class="form-control" value="password123" readonly>
+              <input type="password" class="form-control" value="{{ password }}" readonly>
             </div>
 
             <div class="mb-3">
               <label class="form-label">Bio</label>
-              <textarea class="form-control" rows="4" placeholder="Write a short bio..." readonly>Hi, I'm John. This is a short bio.</textarea>
+              <textarea class="form-control" rows="4" placeholder="Write a short bio..." readonly>{{ bio }}</textarea>
             </div>
 
             <div class="text-end">
               <a href="account_edit.html" class="btn btn-primary edit-btn">Edit Profile</a>
+            </div>
+            <div class="text-end mt-2">
+              <a href="view_my_post.html" class="btn btn-secondary">View My Posts</a>
             </div>
           </div>
         </div>
