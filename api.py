@@ -1,5 +1,6 @@
+from concurrent.futures import thread
 from unicodedata import name
-
+from threads import Thread
 from flask import Flask, render_template, request, redirect, url_for, session
 import database, authenticator
 app = Flask(__name__)
@@ -76,12 +77,11 @@ def update_account():
 
 @app.route("/search", methods=["GET", "POST"])
 def search():
-
-@app.route("/rep_user")
-def rep_user():
-
-@app.route("/del_user")
-def del_user():
+    if request.method == "POST":
+        query = request.form.get("query")
+        results = db.search_posts(query, conn.cursor())
+        return render_template("search_results.html", results=results)
+    return render_template("search.html")
 
 @app.route("/view_post/<int:post_id>", methods=["GET"])
 def view_post(post_id):  
@@ -99,12 +99,16 @@ def view_post(post_id):
 
 @app.route("/post") 
 def post():
+    if 'user_id' not in session:
+        return redirect(url_for('signin'))
+    if request.method == "POST":
+        title = request.form.get("title")
+        content = request.form.get("content")
+        newThread = Thread(session['user_id'], title, content)
+        db.create_post(session['user_id'], title, content, conn.cursor())
+        return redirect(url_for("dashboard"))
+    return render_template("create_post.html")
 
-@app.route("/del_post")
-def del_post():
-
-@app.route("/rep_post")
-def rep_post():
 
 @app.route("/edit_post/<int:post_id>", methods=["GET", "POST"])
 def edit_post(post_id):
@@ -120,6 +124,3 @@ def edit_post(post_id):
             content = request.form.get("content")
             db.update_post(post_id, title, content, conn.cursor())
             return redirect(url_for("view_post", post_id=post_id))
-
-@app.route("/lock_post")
-def lock_post():
