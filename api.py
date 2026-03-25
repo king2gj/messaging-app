@@ -90,6 +90,10 @@ def view_post(post_id):
         return render_template("view_post.html", post=post)
     else:
         return "Post not found", 404
+    if request.method == "POST":
+        content = request.form.get("content")
+        db.add_reply(post_id, session['user_id'], content, conn.cursor())
+        return redirect(url_for("view_post", post_id=post_id))
     
     
 
