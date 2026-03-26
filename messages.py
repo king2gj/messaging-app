@@ -30,7 +30,7 @@ class Message:
         if not hasattr(self, "report_count"):
             self.report_count = 0
             
-        self.report_flag = False if self.report_count == 0 else True
+        self.is_reported = False if self.report_count == 0 else True
 
        
         self.is_locked = True if self.report_count >= 3 else False
@@ -49,13 +49,13 @@ class Message:
         self.dislikes += 1
 
     def report(self, user):
-        if user != self.creator_ID and not self.report_flag:
+        if user != self.creator_ID and not self.is_reported:
             if self.report_count < 3:
                 self.message = "This message has been reported."
                 self.likes = None
                 self.dislikes = None
                 self.creator_ID = None
-                self.report_flag = True
+                self.is_reported = True
                 return "Message reported successfully. Message has been taken down for review."
             else:
                 self.report_count += 1
@@ -98,7 +98,7 @@ class Announcement:
         if not hasattr(self, "report_count"):
             self.report_count = 0
             
-        self.report_flag = False if self.report_count == 0 else True
+        self.is_reported = False if self.report_count == 0 else True
 
        
         self.is_locked = True if self.report_count >= 3 else False
@@ -111,11 +111,11 @@ class Announcement:
             return "You cannot edit this announcement."
     
     def report(self, user):
-        if user != self.creator and not self.report_flag:
+        if user != self.creator and not self.is_reported:
             if self.report_count < 3:
                 self.message = "This announcement has been reported."
                 self.creator = None
-                self.report_flag = True
+                self.is_reported = True
                 return "Announcement reported successfully. Announcement has been taken down for review."
             else:
                 self.report_count += 1
