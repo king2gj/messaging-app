@@ -68,6 +68,10 @@ class Message:
             return "This message has been locked."
         else:
             return f"{self.message} - {self.creator_ID} ({self.likes} likes, {self.dislikes} dislikes)"
+        
+class Comment(Message):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
     
 class Announcement:
     def __init__(self, **kwargs):
