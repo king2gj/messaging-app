@@ -101,6 +101,7 @@ CREATE TABLE posts (
   user_id          BINARY(16) NOT NULL,
   content          VARCHAR(500) NOT NULL,
   is_announcement  BOOLEAN NOT NULL DEFAULT FALSE,
+  is_edited        BOOLEAN NOT NULL DEFAULT FALSE,
   created_at       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   comment_count    INT UNSIGNED NOT NULL DEFAULT 0,
   like_count       INT UNSIGNED NOT NULL DEFAULT 0,
@@ -124,7 +125,7 @@ CREATE TABLE media (
   media_id   BINARY(16) PRIMARY KEY,
   user_id    BINARY(16) NULL,
   post_id    BINARY(16) NULL,
-  file_path  VARCHAR(200) NOT NULL,
+  file_path  VARCHAR(200) NOT NULL UNIQUE,
 
   CONSTRAINT fk_media__user
     FOREIGN KEY (user_id) REFERENCES users(user_id)
