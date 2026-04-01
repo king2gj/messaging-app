@@ -1,0 +1,2 @@
+DELETE FROM media
+WHERE media_id = %s

@@ -1,19 +1,19 @@
+DROP DATABASE message_board;
 CREATE DATABASE message_board;
 USE message_board;
 
 CREATE TABLE users (
-  user_id      BIGINT UNSIGNED PRIMARY KEY,
-  username     VARCHAR(32) NOT NULL UNIQUE,
-  first_name   VARCHAR(32) NOT NULL,
-  last_name    VARCHAR(32) NOT NULL,
-  email        VARCHAR(32) NOT NULL UNIQUE,
-  bio          VARCHAR(160) NOT NULL,
-  is_admin     BOOLEAN NOT NULL,
-  time_joined  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+  user_id     BINARY(16) PRIMARY KEY,
+  username    VARCHAR(32) NOT NULL,
+  email       VARCHAR(32) NOT NULL UNIQUE,
+  bio         VARCHAR(160) NOT NULL,
+  is_admin    BOOLEAN NOT NULL,
+  created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  post_count  INT NOT NULL DEFAULT 0
 );
 
 CREATE TABLE auth (
-  user_id          BIGINT UNSIGNED PRIMARY KEY,
+  user_id          BINARY(16) PRIMARY KEY,
   hashed_password  BINARY(32) NOT NULL,
   salt_code        VARCHAR(32) NOT NULL,
   
@@ -23,15 +23,21 @@ CREATE TABLE auth (
 );
 
 CREATE TABLE colleges (
-    college_id  BIGINT UNSIGNED PRIMARY KEY,
-    name        VARCHAR(100) NOT NULL UNIQUE
-)
+  college_id    BINARY(16) PRIMARY KEY,
+  name          VARCHAR(100) NOT NULL UNIQUE,
+  description   VARCHAR(200) NOT NULL,
+  created_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  course_count  INT NOT NULL DEFAULT 0
+);
 
 CREATE TABLE courses (
-  course_id    BIGINT UNSIGNED PRIMARY KEY,
-  college_id   BIGINT UNSIGNED NOT NULL,
-  course_code  VARCHAR(12) NOT NULL UNIQUE,
-  name         VARCHAR(100) NOT NULL,
+  course_id      BINARY(16) PRIMARY KEY,
+  college_id     BINARY(16) NOT NULL,
+  course_code    VARCHAR(12) NOT NULL UNIQUE,
+  name           VARCHAR(100) NOT NULL,
+  description    VARCHAR(200) NOT NULL,
+  created_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  section_count  INT NOT NULL DEFAULT 0,
 
   CONSTRAINT fk_course__college
     FOREIGN KEY (college_id) REFERENCES colleges(college_id)
@@ -39,9 +45,11 @@ CREATE TABLE courses (
 );
 
 CREATE TABLE sections (
-  section_id      BIGINT UNSIGNED PRIMARY KEY,
-  course_id       BIGINT UNSIGNED NOT NULL,
+  section_id      BINARY(16) PRIMARY KEY,
+  course_id       BINARY(16) NOT NULL,
   section_number  INT UNSIGNED NOT NULL,
+  description     VARCHAR(200) NOT NULL,
+  created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
   CONSTRAINT fk_section__course
     FOREIGN KEY (course_id) REFERENCES courses(course_id)
@@ -49,11 +57,13 @@ CREATE TABLE sections (
 );
 
 CREATE TABLE message_groups (
-  group_id     BIGINT UNSIGNED PRIMARY KEY,
-  group_scope  TINYINT UNSIGNED NOT NULL,
-  college_id   BIGINT UNSIGNED NULL,
-  course_id    BIGINT UNSIGNED NULL,
-  section_id   BIGINT UNSIGNED NULL,
+  group_id      BINARY(16) PRIMARY KEY,
+  group_scope   TINYINT UNSIGNED NOT NULL,
+  college_id    BINARY(16) NULL,
+  course_id     BINARY(16) NULL,
+  section_id    BINARY(16) NULL,
+  post_count    INT NOT NULL DEFAULT 0,
+  member_count  INT NOT NULL DEFAULT 0,
 
   CONSTRAINT fk_message_group__college
     FOREIGN KEY (college_id) REFERENCES colleges(college_id)
@@ -69,8 +79,8 @@ CREATE TABLE message_groups (
 );
 
 CREATE TABLE group_members (
-  group_id  BIGINT UNSIGNED NOT NULL,
-  user_id   BIGINT UNSIGNED NOT NULL,
+  group_id  BINARY(16) NOT NULL,
+  user_id   BINARY(16) NOT NULL,
   role      VARCHAR(20) NOT NULL,
 
   PRIMARY KEY (group_id, user_id),
@@ -85,15 +95,18 @@ CREATE TABLE group_members (
 );
 
 CREATE TABLE posts (
-  post_id         BIGINT UNSIGNED PRIMARY KEY,
-  parent_post_id  BIGINT UNSIGNED NULL,
-  group_id        BIGINT UNSIGNED NOT NULL,
-  user_id         BIGINT UNSIGNED NOT NULL,
-  time_posted     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  comment_count   INT UNSIGNED NULL,
-  like_count      INT UNSIGNED NOT NULL DEFAULT 0,
-  dislike_count   INT UNSIGNED NOT NULL DEFAULT 0,
-  report_count    INT UNSIGNED NOT NULL DEFAULT 0,
+  post_id          BINARY(16) PRIMARY KEY,
+  parent_post_id   BINARY(16) NULL,
+  group_id         BINARY(16) NOT NULL,
+  user_id          BINARY(16) NOT NULL,
+  content          VARCHAR(500) NOT NULL,
+  is_announcement  BOOLEAN NOT NULL DEFAULT FALSE,
+  is_edited        BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  comment_count    INT UNSIGNED NOT NULL DEFAULT 0,
+  like_count       INT UNSIGNED NOT NULL DEFAULT 0,
+  dislike_count    INT UNSIGNED NOT NULL DEFAULT 0,
+  report_count     INT UNSIGNED NOT NULL DEFAULT 0,
 
   CONSTRAINT fk_post__parent
     FOREIGN KEY (parent_post_id) REFERENCES posts(post_id)
@@ -109,11 +122,10 @@ CREATE TABLE posts (
 );
 
 CREATE TABLE media (
-  media_id   BIGINT UNSIGNED PRIMARY KEY,
-  user_id    BIGINT UNSIGNED NULL,
-  post_id    BIGINT UNSIGNED NULL,
-  file_name  VARCHAR(100) NOT NULL,
-  content    MEDIUMBLOB NOT NULL,
+  media_id   BINARY(16) PRIMARY KEY,
+  user_id    BINARY(16) NULL,
+  post_id    BINARY(16) NULL,
+  file_path  VARCHAR(200) NOT NULL UNIQUE,
 
   CONSTRAINT fk_media__user
     FOREIGN KEY (user_id) REFERENCES users(user_id)
@@ -125,8 +137,8 @@ CREATE TABLE media (
 );
 
 CREATE TABLE liked_posts (
-  user_id  BIGINT UNSIGNED NOT NULL,
-  post_id  BIGINT UNSIGNED NOT NULL,
+  user_id  BINARY(16) NOT NULL,
+  post_id  BINARY(16) NOT NULL,
 
   PRIMARY KEY (user_id, post_id),
 
@@ -140,8 +152,8 @@ CREATE TABLE liked_posts (
 );
 
 CREATE TABLE disliked_posts (
-  user_id  BIGINT UNSIGNED NOT NULL,
-  post_id  BIGINT UNSIGNED NOT NULL,
+  user_id  BINARY(16) NOT NULL,
+  post_id  BINARY(16) NOT NULL,
 
   PRIMARY KEY (user_id, post_id),
 
@@ -155,11 +167,11 @@ CREATE TABLE disliked_posts (
 );
 
 CREATE TABLE reports (
-  report_id       BIGINT UNSIGNED PRIMARY KEY,
-  reporter_id     BIGINT UNSIGNED NOT NULL,
-  post_id         BIGINT UNSIGNED NOT NULL,
-  report_time     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  report_id       BINARY(16) PRIMARY KEY,
+  reporter_id     BINARY(16) NOT NULL,
+  post_id         BINARY(16) NOT NULL,
   report_content  VARCHAR(200) NOT NULL,
+  created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
   CONSTRAINT fk_report__user
     FOREIGN KEY (reporter_id) REFERENCES users(user_id)
