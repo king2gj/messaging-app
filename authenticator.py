@@ -1,7 +1,6 @@
 import json
 import hashlib
 import database
-from database import getuser, userlogin
 
 
 class Authenticator:
@@ -27,16 +26,16 @@ class Authenticator:
         
     def load_user_data(self, username):
         try:
-            return access_database.getuser(username, self.conn.cursor())
+            return self.db.getuser(username, self.conn.cursor())
         except FileNotFoundError:
             return {}
 
 
     def authenticate(self, username, password):
-        user_data = self.load_user_data()
+        user_data = self.load_user_data(username)
         salted_password = password + self.salt
         hashed_password = hashlib.sha256(salted_password.encode()).hexdigest()
-        goodauth = user_login(username, hashed_password, self.conn.cursor())
+        goodauth = self.db.user_login(username, hashed_password, self.conn.cursor())
         if goodauth:
             return True
         else:      

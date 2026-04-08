@@ -14,7 +14,7 @@
     <div class="d-flex align-items-start justify-content-center" style="min-height:100vh;padding-top:48px;">
       <div class="card shadow-sm" style="width:100%;max-width:480px;">
         <div class="card-body">
-          <form class="p-4">
+          <form class="p-4"action="/signin" method="POST">
             <img src="https://via.placeholder.com/96?text=Logo" alt="App logo" class="mb-3 mx-auto d-block rounded" style="width:96px;height:96px;">
             <h1 class="h3 mb-1 font-weight-normal">Welcome Back</h1>
             <p class="text-muted mb-3 small">Please enter your credentials below</p>
@@ -23,7 +23,7 @@
         class="sr-only">Email Address</label>
         -->
         <div class="mb-3">
-        <input type="email" id="emailAddress"
+        <input type="email" id="emailAddress" name ="email"
         class="form-control" placeholder="Email Address"
         required autofocus>
         </div>
@@ -32,7 +32,7 @@
         class="sr-only">Password</label>
         -->
         <div class="mb-3">
-        <input type="password" id="password"
+        <input type="password" id="pwd" name="password"
         placeholder="Password" class="form-control">
         </div>
         <div class="checkbox">
@@ -43,7 +43,7 @@
         </div>
             <div class="mt-3 d-flex align-items-center justify-content-between">
               <button type="submit" class="btn btn-lg btn-primary">Sign In</button>
-              <p class="mb-0 ms-3">Don't have an account? <a href="signup.html">Sign up</a></p>
+              <p class="mb-0 ms-3">Don't have an account? <a href="signup">Sign up</a></p>
             </div>
           </form>
         </div>
