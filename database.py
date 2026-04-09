@@ -311,13 +311,35 @@ def add_profile_picture(
         sql = load_sql("sql/media/create_new_profile_picture.sql")
         params = (media_id, user_id, file_path)
         cursor.execute(sql, params)
-        
-def user_login(email: str, password: str, cursor) -> bool:
-        sql = load_sql("sql/authentication/user_login.sql")
-        params = (email, password)
-        cursor.execute(sql, params)
-        result = cursor.fetchone()
-        return result is not None
+
+def get_user_object(
+        user_id: bytes,
+        cursor) -> users.StandardUser | None:
+    sql = load_sql("sql/users/get_user_info.sql")
+    params = (user_id,)
+    cursor.execute(sql, params)
+
+    row = cursor.fetchone()
+
+    if row is None:
+        return None
+
+    columns = [col[0] for col in cursor.description]
+    data = dict(zip(columns, row))
+
+    user_kwargs = {
+        "user_ID": uuid.UUID(bytes=data["user_id"]),
+        "username": data["username"],
+        "email": data["email"],
+        "bio": data["bio"],
+        "post_count": data["post_count"],
+        "is_admin": data["is_admin"],
+        "date_joined": data["created_at"],
+        "auth_success": True
+    }
+
+    return users.StandardUser(**user_kwargs)
+
 
 class access_database:
     def __init__(self, host=None, user=None, password=None, database=None, port=None):
@@ -342,44 +364,6 @@ class access_database:
             print(e)
             return None
         
-    def getuser(self, email: str, cursor):
-        sql = load_sql("sql/authentication/get_user.sql")
-        params = (email)
-        cursor.execute(sql, params)
-        result = cursor.fetchone()
-        return result #this returned result should be the user object
-    def newuser(self, email: str, username: str, password: bytes):
-        try:
-            conn = self.connect()
-            if conn is None:
-                print("Failed to connect to database.")
-                return False
-            with conn.cursor() as cur:
-                sql = load_sql("sql/users/create_new_user.sql")
-                params = (email, username, password)
-                cur.execute(sql, params)
-                conn.commit()
-    
-            return True
-        except Error as e:
-            print(e)
-            return False
-    def updateuser(self, email: str, password: bytes):
-        try:
-            conn = self.connect()
-            if conn is None:
-                print("Failed to connect to database.")
-                return False
-            with conn.cursor() as cur:
-                sql = load_sql("sql/authentication/update_user.sql")
-                params = (email, password, )
-                cur.execute(sql, params)
-                conn.commit()
-    
-            return True
-        except Error as e:
-            print(e)
-            return False
 if __name__ == "__main__":
     # quick runtime check when executing this file directly
     db = access_database()
