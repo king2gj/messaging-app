@@ -73,7 +73,7 @@ def account():
     user = database.get_user_object(session['user_id'], conn.cursor())
     return render_template("account.html", user=user)
 
-@board.route("/update_account")
+@board.route("/account_edit", methods=["GET", "POST"])
 def update_account():
     if 'user_id' not in session:
         return redirect(url_for('signin', error="User not logged in, Please sign in to access your account."))
@@ -83,8 +83,28 @@ def update_account():
         authenticator.Authenticator.save_user_data(email, password)
         db.updateuser(email, password)
         return redirect(url_for("account"))
-    return render_template("update_account.html")
+    return render_template("account_edit.html")
 
+@board.route("/create_post", methods=["GET", "POST"]) 
+def create_post():
+    if 'user_id' not in session:
+        return redirect(url_for('signin'))
+    if request.method == "POST":
+        title = request.form.get("title")
+        content = request.form.get("content")
+        tags = request.form.get("tags")
+        new_thread = thread(
+            title=title,
+            creator_ID=session['user_id'],
+            content=content
+        )
+        try:
+            database.add_new_post(new_thread)
+            return redirect(url_for("dashboard"))
+        except Exception as e:
+            print(f"Error creating post: {e}")
+            return render_template("create_post.html", error="An error occurred while creating the post. Please try again.")
+    return render_template("create_post.html")
 @board.route("/search", methods=["GET", "POST"])
 def search():
     if request.method == "POST":
@@ -93,7 +113,7 @@ def search():
         return render_template("search_results.html", results=results)
     return render_template("search.html")
 
-@board.route("/view_post/<int:post_id>", methods=["GET"])
+@board.route("/view_post/<int:post_id>", methods=["GET", "POST"])
 def view_post(post_id):  
     post = db.get_post(post_id, conn.cursor())
     if post:
@@ -104,20 +124,6 @@ def view_post(post_id):
         content = request.form.get("content")
         db.add_reply(post_id, session['user_id'], content, conn.cursor())
         return redirect(url_for("view_post", post_id=post_id))
-    
-    
-
-@board.route("/post") 
-def post():
-    if 'user_id' not in session:
-        return redirect(url_for('signin'))
-    if request.method == "POST":
-        title = request.form.get("title")
-        content = request.form.get("content")
-        newThread = thread(session['user_id'], title, content)
-        db.create_post(session['user_id'], title, content, conn.cursor())
-        return redirect(url_for("dashboard"))
-    return render_template("create_post.html")
 
 
 @board.route("/edit_post/<int:post_id>", methods=["GET", "POST"])

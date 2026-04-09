@@ -2,6 +2,8 @@
 
 <!doctype html>
 <html lang="en">
+    <!-- just the dialog divs and script here -->
+
   <head>
     <!-- Required meta tags -->
     <meta charset="utf-8">
@@ -19,6 +21,9 @@
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
         </button>
+        {% if error %}
+    		<div class="alert alert-danger py-2 small">{{ error }}</div>
+		{% endif %}
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item">
@@ -49,7 +54,7 @@
                     <div class="card-body">
                         <h1 class="auth-title">Create Post</h1>
                         <p class="auth-sub">Write something great and share it with others.</p>
-
+                       
                         <form action="/create_post" method="post" enctype="multipart/form-data" id="create-post-form">
                         <label for="title">Title</label>
                         <input id="title" name="title" class="form-control" type="text" placeholder="Enter a title" required />

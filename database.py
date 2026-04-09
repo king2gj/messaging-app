@@ -2,6 +2,8 @@ import os
 from unittest import result
 import uuid
 import users
+import threads
+import datetime
 import mysql.connector
 from mysql.connector import connect, Error
 from pathlib import Path
@@ -77,28 +79,6 @@ def get_user_auth_info_by_id(user_id: bytes) -> tuple[bytes, str]:
 
     hashed_password, salt_code = result
     return hashed_password, salt_code
-
-# FOR INTERNAL USE ONLY. USE GROUP_ID IN PYTHON CODE
-def get_college_id_by_name(
-            name: str,
-            cursor) -> bytes:
-        sql = load_sql("sql/colleges/get_id_by_name.sql")
-        params = (name,)
-        conn.cursor().execute(sql, params)
-
-        (college_id,) = cursor.fetchone()
-        return college_id   
-# FOR INTERNAL USE ONLY. USE GROUP_ID IN PYTHON CODE
-def get_course_id_by_course_code(
-        course_code: str,
-        cursor) -> bytes:
-    sql = load_sql("sql/courses/get_id_by_course_code.sql")
-    params = (course_code,)
-    cursor.execute(sql, params)
-
-    (course_id,) = cursor.fetchone()
-    return course_id
-
 def add_new_user(
             username: str,
             email:str,
@@ -138,6 +118,48 @@ def add_new_user(
         params = (newUser.user_ID, newUser.password, newUser.salt_code)
         conn.cursor().execute(sql, params)
         conn.commit()
+
+def add_new_post(post) -> None:
+    for x in {post.thread_ID.bytes, post.creator_ID}:
+        if len(x) != 16:
+            raise ValueError("All IDs must be 16 bytes")
+    if len(post.content) > 500:
+        raise ValueError("Content cannot exceed 500 characters")
+
+    sql = load_sql("sql/posts/create_new_post.sql")
+    params = (post.title, post.thread_ID.bytes, post.creator_ID, post.content, post.announcement)
+    cursor = conn.cursor(buffered=True)
+    cursor.execute(sql, params)
+    conn.commit()
+    sql = load_sql("sql/users/increment_post_count.sql")
+    params = (post.creator_ID,)
+    cursor.execute(sql, params)
+    conn.commit()
+    # sql = load_sql("sql/message_groups/increment_post_count")
+    # params = (post.group_ID,)
+    # cursor.execute(sql, params)
+    # conn.commit()
+
+# FOR INTERNAL USE ONLY. USE GROUP_ID IN PYTHON CODE
+def get_college_id_by_name(
+            name: str,
+            cursor) -> bytes:
+        sql = load_sql("sql/colleges/get_id_by_name.sql")
+        params = (name,)
+        conn.cursor().execute(sql, params)
+
+        (college_id,) = cursor.fetchone()
+        return college_id   
+# FOR INTERNAL USE ONLY. USE GROUP_ID IN PYTHON CODE
+def get_course_id_by_course_code(
+        course_code: str,
+        cursor) -> bytes:
+    sql = load_sql("sql/courses/get_id_by_course_code.sql")
+    params = (course_code,)
+    cursor.execute(sql, params)
+
+    (course_id,) = cursor.fetchone()
+    return course_id
 
 def add_new_college(
         group_id: bytes,
@@ -208,39 +230,14 @@ def add_new_section(
 
     sql = load_sql("sql/sections/create_new_section.sql")
     params = (section_id, course_id, section_number, description)
-    cursor.execute(sql, params)
-
+    conn.cursor.execute(sql, params)
+    conn.commit()
     sql = load_sql("sql/message_groups/create_new_section_group.sql")
     params = (group_id, section_id)
-    cursor.execute(sql, params)
-
+    conn.cursor.execute(sql, params)
+    conn.commit()
     sql = load_sql("sql/courses/increment_section_count.sql")
     params = (course_id,)
-    cursor.execute(sql, params)
-
-def add_new_post(
-        post_id: bytes,
-        group_id: bytes,
-        user_id: bytes,
-        content: str,
-        is_announcement: bool,
-        cursor) -> None:
-    for x in {post_id, group_id, user_id}:
-        if len(x) != 16:
-            raise ValueError("All IDs must be 16 bytes")
-    if len(content) > 500:
-        raise ValueError("Content cannot exceed 500 characters")
-
-    sql = load_sql("sql/posts/create_new_post.sql")
-    params = (post_id, group_id, user_id, content, is_announcement)
-    cursor.execute(sql, params)
-
-    sql = load_sql("sql/users/increment_post_count")
-    params = (user_id,)
-    cursor.execute(sql, params)
-
-    sql = load_sql("sql/message_groups/increment_post_count")
-    params = (group_id,)
     cursor.execute(sql, params)
 
 def add_new_comment(

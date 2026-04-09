@@ -2,11 +2,11 @@ import datetime
 import uuid
 
 class thread:
-    def __init__(self, creator_ID, name, description, group_ID = None, course_code = None, section_ID = None, priority = 0):
+    def __init__(self, creator_ID, title, content, group_ID = None, course_code = None, section_ID = None, priority = 0):
         self.thread_ID = uuid.uuid4()
         self.creator_ID = creator_ID
-        self.name = name
-        self.description = description
+        self.title = title
+        self.content = content
         self.course_code = course_code
         self.section_ID = section_ID
         self.group_ID = group_ID
@@ -14,6 +14,7 @@ class thread:
         self.members = [creator_ID]
         self.messages = []
         self.message_count = 0
+        self.announcement = False
         self.creation_date = datetime.datetime.now()
         self.last_message_date = None
         self.last_message = None
@@ -169,7 +170,7 @@ class thread:
                 if self.is_active == True:
                     # wipe all self attributes to none
                     self.creator_ID = None
-                    self.name = None
+                    self.title = None
                     self.description = None
                     self.course_code = None
                     self.section_ID = None
