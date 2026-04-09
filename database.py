@@ -1,6 +1,6 @@
 import os
 import uuid
-
+import users
 import mysql.connector
 from mysql.connector import connect, Error
 from pathlib import Path
@@ -11,11 +11,13 @@ try:
 except Exception:
     pass
 
-    def load_sql(self, path: str | Path) -> str:
-        path = Path(path)
-        return path.read_text(encoding="utf-8")
+BASE_DIR = Path(__file__).parent
 
-    def get_user_id_by_email(
+def load_sql(path: str | Path) -> str:
+    full_path = BASE_DIR / path
+    return full_path.read_text(encoding="utf-8")
+
+def get_user_id_by_email(
             email: str,
             cursor) -> bytes:
         sql = load_sql("sql/users/get_id_by_email.sql")
@@ -26,7 +28,7 @@ except Exception:
         return user_id
 
 # FOR INTERNAL USE ONLY. USE GROUP_ID IN PYTHON CODE
-    def get_college_id_by_name(
+def get_college_id_by_name(
             name: str,
             cursor) -> bytes:
         sql = load_sql("sql/colleges/get_id_by_name.sql")
@@ -37,7 +39,7 @@ except Exception:
         return college_id
 
     # FOR INTERNAL USE ONLY. USE GROUP_ID IN PYTHON CODE
-    def get_course_id_by_course_code(
+def get_course_id_by_course_code(
             course_code: str,
             cursor) -> bytes:
         sql = load_sql("sql/courses/get_id_by_course_code.sql")
@@ -47,8 +49,7 @@ except Exception:
         (course_id,) = cursor.fetchone()
         return course_id
 
-    def add_new_user(
-            user_id: bytes,
+def add_new_user(
             username: str,
             email:str,
             bio: str,
@@ -56,27 +57,36 @@ except Exception:
             hashed_password: bytes,
             salt_code: str,
             cursor) -> None:
-        if len(user_id) != 16:
+        newUser = users.StandardUser()
+        newUser.user_ID = uuid.uuid4().bytes
+        newUser.username = username
+        newUser.email = email
+        newUser.bio = bio
+        newUser.is_admin = is_admin
+        newUser.password = hashed_password
+        newUser.salt_code = salt_code
+
+        if len(newUser.user_ID) != 16:
             raise ValueError("ID must be 16 bytes")
-        for x in {username, email}:
+        for x in {newUser.username, newUser.email}:
             if len(x) > 32:
                 raise ValueError("Username and email cannot exceed 32 characters")
-        if len(bio) > 160:
+        if len(newUser.bio) > 160:
             raise ValueError("Bio cannot exceed 160 characters")
-        if len(hashed_password) != 32:
+        if len(newUser.password) != 32:
             raise ValueError("Hashed password must be 32 bytes")
-        if len(salt_code) > 32:
+        if len(newUser.salt_code) > 32:
             raise ValueError("Salt code cannot exceed 32 characters")
 
         sql = load_sql("sql/users/create_new_user.sql")
-        params = (user_id, username, email, bio, is_admin)
+        params = (newUser.user_ID, newUser.username, newUser.email, newUser.bio, newUser.is_admin)
         cursor.execute(sql, params)
 
         sql = load_sql("sql/auth/create_new_auth.sql")
-        params = (user_id, hashed_password, salt_code)
+        params = (newUser.user_ID, newUser.password, newUser.salt_code)
         cursor.execute(sql, params)
 
-    def add_new_college(
+def add_new_college(
             group_id: bytes,
             name: str,
             description: str,
@@ -98,7 +108,7 @@ except Exception:
         params = (group_id, college_id)
         cursor.execute(sql, params)
 
-    def add_new_course(
+def add_new_course(
             group_id: bytes,
             course_code: str,
             name: str,
@@ -129,7 +139,7 @@ except Exception:
         params = (college_id,)
         cursor.execute(sql, params)
 
-    def add_new_section(
+def add_new_section(
             group_id: bytes,
             course_code: str,
             section_number: int,
@@ -155,7 +165,7 @@ except Exception:
         params = (course_id,)
         cursor.execute(sql, params)
 
-    def add_new_post(
+def add_new_post(
             post_id: bytes,
             group_id: bytes,
             user_id: bytes,
@@ -180,7 +190,7 @@ except Exception:
         params = (group_id,)
         cursor.execute(sql, params)
 
-    def add_new_comment(
+def add_new_comment(
             post_id: bytes,
             parent_post_id: bytes,
             group_id: bytes,
@@ -201,7 +211,7 @@ except Exception:
         params = (parent_post_id,)
         cursor.execute(sql, params)
 
-    def add_new_report(
+def add_new_report(
             report_id: bytes,
             reporter_id: bytes,
             post_id: bytes,
@@ -221,7 +231,7 @@ except Exception:
         params = (post_id,)
         cursor.execute(sql, params)
 
-    def add_user_to_group(
+def add_user_to_group(
             user_id: bytes,
             group_id: bytes,
             role: str,
@@ -240,7 +250,7 @@ except Exception:
         params = (group_id,)
         cursor.execute(sql, params)
 
-    def add_like(
+def add_like(
             user_id: bytes,
             post_id: bytes,
             cursor) -> None:
@@ -256,7 +266,7 @@ except Exception:
         params = (post_id,)
         cursor.execute(sql, params)
 
-    def add_dislike(
+def add_dislike(
             user_id: bytes,
             post_id: bytes,
             cursor) -> None:
@@ -272,7 +282,7 @@ except Exception:
         params = (post_id,)
         cursor.execute(sql, params)
 
-    def add_file_to_post(
+def add_file_to_post(
             media_id: bytes,
             post_id: bytes,
             file_path: str,
@@ -287,7 +297,7 @@ except Exception:
         params = (media_id, post_id, file_path)
         cursor.execute(sql, params)
 
-    def add_profile_picture(
+def add_profile_picture(
             media_id: bytes,
             user_id: bytes,
             file_path: str,
@@ -302,7 +312,7 @@ except Exception:
         params = (media_id, user_id, file_path)
         cursor.execute(sql, params)
         
-    def user_login(email: str, password: str, cursor) -> bool:
+def user_login(email: str, password: str, cursor) -> bool:
         sql = load_sql("sql/authentication/user_login.sql")
         params = (email, password)
         cursor.execute(sql, params)
@@ -312,9 +322,9 @@ except Exception:
 class access_database:
     def __init__(self, host=None, user=None, password=None, database=None, port=None):
         self.host = host or os.getenv("DB_HOST", "localhost")
-        self.user = user or os.getenv("DB_USER", "python")
-        self.password = password or os.getenv("DB_PASS", "python")
-        self.database = database or os.getenv("DB_NAME", "auth")
+        self.user = user or os.getenv("DB_USER", "root")
+        self.password = password or os.getenv("DB_PASS", "root")
+        self.database = database or os.getenv("DB_NAME", "message_board")
         self.port = int(port or os.getenv("DB_PORT", 3306))
 
     def connect(self):
@@ -338,15 +348,15 @@ class access_database:
         cursor.execute(sql, params)
         result = cursor.fetchone()
         return result #this returned result should be the user object
-    def newuser(self, email: str, password: str, username: str):
+    def newuser(self, email: str, username: str, password: bytes):
         try:
             conn = self.connect()
             if conn is None:
                 print("Failed to connect to database.")
                 return False
             with conn.cursor() as cur:
-                sql = load_sql("sql/authentication/create_new_user.sql")
-                params = (email, password)
+                sql = load_sql("sql/users/create_new_user.sql")
+                params = (email, username, password)
                 cur.execute(sql, params)
                 conn.commit()
     
@@ -354,7 +364,7 @@ class access_database:
         except Error as e:
             print(e)
             return False
-    def updateuser(self, email: str, password: str):
+    def updateuser(self, email: str, password: bytes):
         try:
             conn = self.connect()
             if conn is None:

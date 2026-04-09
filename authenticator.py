@@ -1,5 +1,6 @@
 import json
 import hashlib
+import uuid
 import database
 
 
@@ -9,7 +10,7 @@ class Authenticator:
     conn = db.connect()
 
     def __init__(self):
-        self.salt = "random_salt"
+        self.salt = "None"
         self.user_data = None
 
     def hash_password(self, password):
@@ -17,10 +18,12 @@ class Authenticator:
         hashed_password = hashlib.sha256(salted_password.encode()).digest()
         return hashed_password
     
-    def save_user_data(self, email, username, password, conn_cursor):
+    def save_user_data(self, email, username, password):
+        try:
+        self.salt = uuid.uuid4().hex
         hashed_password = self.hash_password(password)
-        if self.db.newuser(email, username, hashed_password, conn_cursor):
-            return True
+        result = database.add_new_user(username=username, email=email, bio="", is_admin=False, hashed_password=hashed_password, salt_code=self.salt, cursor=self.conn.cursor()):
+        return result
         else:
             return False
         

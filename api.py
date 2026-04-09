@@ -17,7 +17,7 @@ def dashboard():
     if 'user_id' not in session:
         return redirect(url_for('signin'))
     return render_template(
-        'dashboard.html', 
+        'home.html', 
         user_id=session['user_id']
     )
 
@@ -25,10 +25,12 @@ def dashboard():
 def signup():
     if request.method == "POST":
         email = request.form.get("email")
-        username = request.form.get("username")
+        first_name = request.form.get("firstName")
+        last_name = request.form.get("lastName")
+        username = f"{first_name}{last_name}".lower() 
         password = request.form.get("password")
         auth = authenticator.Authenticator()
-        saved = auth.save_user_data(email, username, password, conn.cursor())
+        saved = auth.save_user_data(email, username, password)
         if saved:
             return redirect(url_for("signin"))
         else:
