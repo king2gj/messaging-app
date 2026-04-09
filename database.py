@@ -319,22 +319,22 @@ def get_user_object(
     params = (user_id,)
     cursor.execute(sql, params)
 
-    row = cursor.fetchone()
+    raw_data = cursor.fetchone()
 
-    if row is None:
+    if raw_data is None:
         return None
 
     columns = [col[0] for col in cursor.description]
-    data = dict(zip(columns, row))
+    dict_data = dict(zip(columns, raw_data))
 
     user_kwargs = {
-        "user_ID": uuid.UUID(bytes=data["user_id"]),
-        "username": data["username"],
-        "email": data["email"],
-        "bio": data["bio"],
-        "post_count": data["post_count"],
-        "is_admin": data["is_admin"],
-        "date_joined": data["created_at"],
+        "user_ID": uuid.UUID(bytes=dict_data["user_id"]),
+        "username": dict_data["username"],
+        "email": dict_data["email"],
+        "bio": dict_data["bio"],
+        "post_count": dict_data["post_count"],
+        "is_admin": dict_data["is_admin"],
+        "date_joined": dict_data["created_at"],
         "auth_success": True
     }
 
