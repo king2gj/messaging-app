@@ -55,15 +55,28 @@ def load_sql(path: str | Path) -> str:
     full_path = BASE_DIR / path
     return full_path.read_text(encoding="utf-8")
 
-def get_user_id_by_email(
-            email: str,
-            cursor) -> bytes:
+def get_user_id_by_email(email: str,) -> bytes:
         sql = load_sql("sql/users/get_id_by_email.sql")
         params = (email,)
+        cursor = conn.cursor(buffered=True) 
         cursor.execute(sql, params)
+        result = cursor.fetchone()
+        if result is None:
+            return None
+        return result[0]
+def get_user_auth_info_by_id(user_id: bytes) -> tuple[bytes, str]:
+    sql = load_sql("sql/auth/get_auth_info.sql")
+    params = (user_id,)
+    cursor = conn.cursor(buffered=True)
+    cursor.execute(sql, params)
 
-        (user_id,) = cursor.fetchone()
-        return user_id
+    result = cursor.fetchone()
+    print(f"Auth info for user ID {user_id}: {result}")
+    if result is None:
+        raise ValueError("No auth info found for given user ID")
+
+    hashed_password, salt_code = result
+    return hashed_password, salt_code
 
 # FOR INTERNAL USE ONLY. USE GROUP_ID IN PYTHON CODE
 def get_college_id_by_name(
@@ -71,11 +84,10 @@ def get_college_id_by_name(
             cursor) -> bytes:
         sql = load_sql("sql/colleges/get_id_by_name.sql")
         params = (name,)
-        cursor.execute(sql, params)
+        conn.cursor().execute(sql, params)
 
-    (college_id,) = cursor.fetchone()
-    return college_id
-
+        (college_id,) = cursor.fetchone()
+        return college_id   
 # FOR INTERNAL USE ONLY. USE GROUP_ID IN PYTHON CODE
 def get_course_id_by_course_code(
         course_code: str,
@@ -93,8 +105,7 @@ def add_new_user(
             bio: str,
             is_admin: bool,
             hashed_password: bytes,
-            salt_code: str,
-            cursor) -> None:
+            salt_code: str,) -> None:
         
 
         newUser = users.StandardUser()
@@ -381,78 +392,3 @@ def get_user_object(
     }
 
     return users.StandardUser(**user_kwargs)
-
-
-class access_database:
-    def __init__(self, host=None, user=None, password=None, database=None, port=None):
-        self.host = host or os.getenv("DB_HOST", "localhost")
-        self.user = user or os.getenv("DB_USER", "root")
-        self.password = password or os.getenv("DB_PASS", "root")
-        self.database = database or os.getenv("DB_NAME", "message_board")
-        self.port = int(port or os.getenv("DB_PORT", 3306))
-
-    def connect(self):
-        try:
-            conn = connect(
-                host=self.host,
-                user=self.user,
-                port=self.port,
-                password=self.password,
-                database=self.database,
-            )
-
-            return conn
-        except Error as e:
-            print(e)
-            return None
-        
-    def getuser(self, email: str, cursor):
-        sql = load_sql("sql/authentication/get_user.sql")
-        params = (email)
-        cursor.execute(sql, params)
-        result = cursor.fetchone()
-        return result #this returned result should be the user object
-    def newuser(self, email: str, username: str, password: bytes):
-        try:
-            conn = self.connect()
-            if conn is None:
-                print("Failed to connect to database.")
-                return False
-            with conn.cursor() as cur:
-                sql = load_sql("sql/users/create_new_user.sql")
-                params = (email, username, password)
-                cur.execute(sql, params)
-                conn.commit()
-    
-            return True
-        except Error as e:
-            print(e)
-            return False
-    def updateuser(self, email: str, password: bytes):
-        try:
-            conn = self.connect()
-            if conn is None:
-                print("Failed to connect to database.")
-                return False
-            with conn.cursor() as cur:
-                sql = load_sql("sql/authentication/update_user.sql")
-                params = (email, password, )
-                cur.execute(sql, params)
-                conn.commit()
-    
-            return True
-        except Error as e:
-            print(e)
-            return False
-if __name__ == "__main__":
-    # quick runtime check when executing this file directly
-    db = access_database()
-    conn = db.connect()
-    if conn:
-        print("Connection established.")
-        try:
-            conn.close()
-        except Exception:
-            pass
-    else:
-        print("Failed to connect to database.")

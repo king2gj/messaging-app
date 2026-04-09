@@ -6,7 +6,7 @@ from flask import Flask, render_template, request, redirect, url_for, session
 import database
 import authenticator
 board = Flask(__name__)
-
+board.secret_key = "donthackus"
 
 
 db = database.access_database()
@@ -15,7 +15,7 @@ conn = db.connect()
 @board.route("/dashboard")
 def dashboard():
     if 'user_id' not in session:
-        return redirect(url_for('signin'))
+        return redirect(url_for('signin', error="User not logged in, Please sign in to access the dashboard."))
     return render_template(
         'home.html', 
         user_id=session['user_id']
@@ -23,6 +23,9 @@ def dashboard():
 
 @board.route("/signup", methods=["GET", "POST"])
 def signup():
+    if 'user_id' in session:
+        return redirect(url_for('dashboard'))
+    error = request.args.get("error")
     if request.method == "POST":
         email = request.form.get("email")
         first_name = request.form.get("firstName")
@@ -37,22 +40,25 @@ def signup():
             return render_template("signup.html", error="An account with that email already exists.")
         else:
             return render_template("signup.html", error="An error occurred. Please try again.")
-    return render_template("signup.html")
+    return render_template("signup.html", error=error)
 
 @board.route("/signin", methods=["GET", "POST"])
 def signin():
+    if 'user_id' in session:
+        return redirect(url_for('dashboard'))
+    error = request.args.get("error") 
     if request.method == "POST":
         email = request.form.get("email")
         password = request.form.get("password")
         auth = authenticator.Authenticator()
         authed = auth.authenticate(email, password)
         if authed:
-            user = db.get_user(email, conn.cursor())
-            session["user_id"] = user.user_ID  
+            user_id = database.get_user_id_by_email(email)
+            session["user_id"] = user_id
             return redirect(url_for("dashboard"))
         else:
-            return "Invalid credentials", 401
-    return render_template("signin.html")
+            return render_template("signin.html", error="Invalid credentials.")
+    return render_template("signin.html", error=error)
         
 
 @board.route("/signout")
@@ -63,14 +69,14 @@ def signout():
 @board.route("/account")
 def account():
     if 'user_id' not in session:
-        return redirect(url_for('signin'))
-    user = db.get_user_by_id(session['user_id'], conn.cursor())
+        return redirect(url_for('signin', error="User not logged in, Please sign in to access your account."))
+    user = database.get_user_object(session['user_id'], conn.cursor())
     return render_template("account.html", user=user)
 
 @board.route("/update_account")
 def update_account():
     if 'user_id' not in session:
-        return redirect(url_for('signin'))
+        return redirect(url_for('signin', error="User not logged in, Please sign in to access your account."))
     if request.method == "POST":
         email = request.form.get("email")
         password = request.form.get("password")
