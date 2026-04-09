@@ -20,13 +20,17 @@ class Authenticator:
     
     def save_user_data(self, email, username, password):
         try:
-        self.salt = uuid.uuid4().hex
-        hashed_password = self.hash_password(password)
-        result = database.add_new_user(username=username, email=email, bio="", is_admin=False, hashed_password=hashed_password, salt_code=self.salt, cursor=self.conn.cursor()):
-        return result
-        else:
-            return False
-        
+            usercheck = database.get_user_id_by_email(email, self.conn.cursor())
+            print(f"usercheck result: {usercheck}")
+            if usercheck is not None:
+                return "exists"
+            self.salt = uuid.uuid4().hex
+            hashed_password = self.hash_password(password)
+            result = database.add_new_user(username=username, email=email, bio="", is_admin=False, hashed_password=hashed_password, salt_code=self.salt, cursor=self.conn.cursor())
+            return "success"
+        except Exception as e:
+            print(f"Error saving user data: {e}")
+            return "error"
     def load_user_data(self, username):
         try:
             return self.db.getuser(username, self.conn.cursor())

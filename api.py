@@ -30,11 +30,13 @@ def signup():
         username = f"{first_name}{last_name}".lower() 
         password = request.form.get("password")
         auth = authenticator.Authenticator()
-        saved = auth.save_user_data(email, username, password)
-        if saved:
+        result = auth.save_user_data(email, username, password)
+        if result == "success":
             return redirect(url_for("signin"))
+        elif result == "exists":
+            return render_template("signup.html", error="An account with that email already exists.")
         else:
-            return "Error saving user data", 500
+            return render_template("signup.html", error="An error occurred. Please try again.")
     return render_template("signup.html")
 
 @board.route("/signin", methods=["GET", "POST"])
