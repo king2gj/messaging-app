@@ -143,5 +143,10 @@ def edit_post(post_id):
             return redirect(url_for("view_post", post_id=post_id))
 
 
+@board.route("/testpost")
+def testpost():
+    return render_template("testpost.html")
+
+
 if __name__ == '__main__':
     board.run(debug=True)
