@@ -19,15 +19,15 @@ class Authenticator:
         hashed_password = hashlib.sha256(salted_password.encode()).digest()
         return hashed_password
     
-    def save_user_data(self, email, username, password):
+    def save_user_data(self, email, first_name, last_name, username, password):
         try:
             usercheck = database.get_user_id_by_email(email)
             print(f"usercheck result: {usercheck}")
             if usercheck is not None:
-                return "exists"
+                return "emailexists"
             self.salt = uuid.uuid4().hex
             hashed_password = self.hash_password(password)
-            result = database.add_new_user(username=username, email=email, bio="", is_admin=False, hashed_password=hashed_password, salt_code=self.salt)
+            result = database.add_new_user(username=username, first_name=first_name, last_name=last_name, email=email, bio="", is_admin=False, hashed_password=hashed_password, salt_code=self.salt)
             return "success"
         except Exception as e:
             print(f"Error saving user data: {e}")

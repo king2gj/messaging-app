@@ -30,13 +30,13 @@ def signup():
         email = request.form.get("email")
         first_name = request.form.get("firstName")
         last_name = request.form.get("lastName")
-        username = f"{first_name}{last_name}".lower() 
+        username = request.form.get("username")
         password = request.form.get("password")
         auth = authenticator.Authenticator()
-        result = auth.save_user_data(email, username, password)
+        result = auth.save_user_data(email, first_name, last_name, username, password)
         if result == "success":
             return redirect(url_for("signin"))
-        elif result == "exists":
+        elif result == "emailexists":
             return render_template("signup.html", error="An account with that email already exists.")
         else:
             return render_template("signup.html", error="An error occurred. Please try again.")
@@ -70,6 +70,7 @@ def signout():
 def account():
     if 'user_id' not in session:
         return redirect(url_for('signin', error="User not logged in, Please sign in to access your account."))
+    print(f"session user_id: {session['user_id']}, type: {type(session['user_id'])}")
     user = database.get_user_object(session['user_id'], conn.cursor())
     return render_template("account.html", user=user)
 

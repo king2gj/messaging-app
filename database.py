@@ -81,6 +81,8 @@ def get_user_auth_info_by_id(user_id: bytes) -> tuple[bytes, str]:
     return hashed_password, salt_code
 def add_new_user(
             username: str,
+            first_name: str,
+            last_name: str,
             email:str,
             bio: str,
             is_admin: bool,
@@ -91,6 +93,8 @@ def add_new_user(
         newUser = users.StandardUser()
         newUser.user_ID = uuid.uuid4().bytes
         newUser.username = username
+        newUser.first_name = first_name
+        newUser.last_name = last_name
         newUser.email = email
         newUser.bio = bio
         newUser.is_admin = is_admin
@@ -110,7 +114,7 @@ def add_new_user(
             raise ValueError("Salt code cannot exceed 32 characters")
 
         sql = load_sql("sql/users/create_new_user.sql")
-        params = (newUser.user_ID, newUser.username, newUser.email, newUser.bio, newUser.is_admin)
+        params = (newUser.user_ID, newUser.username, newUser.email, newUser.bio, newUser.is_admin, newUser.first_name, newUser.last_name)
         conn.cursor().execute(sql, params)
         conn.commit()
 
@@ -370,7 +374,7 @@ def get_user_object(
     cursor.execute(sql, params)
 
     raw_data = cursor.fetchone()
-
+    print(f"get_user_object raw_data: {raw_data}")
     if raw_data is None:
         return None
 
@@ -380,6 +384,8 @@ def get_user_object(
     user_kwargs = {
         "user_ID": uuid.UUID(bytes=dict_data["user_id"]),
         "username": dict_data["username"],
+        "first_name": dict_data["first_name"],
+        "last_name": dict_data["last_name"],
         "email": dict_data["email"],
         "bio": dict_data["bio"],
         "post_count": dict_data["post_count"],

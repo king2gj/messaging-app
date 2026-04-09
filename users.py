@@ -12,6 +12,12 @@ class StandardUser:
         if not hasattr(self, 'username'):
             self.username = None
 
+        if not hasattr(self, 'first_name'):
+            self.first_name = None
+
+        if not hasattr(self, 'last_name'):
+            self.last_name = None
+
         self.type = "standard_user"
         self.is_admin = False
 
