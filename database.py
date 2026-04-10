@@ -131,7 +131,7 @@ def add_new_post(post) -> None:
         raise ValueError("Content cannot exceed 500 characters")
 
     sql = load_sql("sql/posts/create_new_post.sql")
-    params = (post.title, post.thread_ID.bytes, post.creator_ID, post.content, post.announcement)
+    params = (post.title, post.thread_ID.bytes, post.creator_ID, post.creator_name, post.content, post.announcement)
     cursor = conn.cursor(buffered=True)
     cursor.execute(sql, params)
     conn.commit()
@@ -143,6 +143,52 @@ def add_new_post(post) -> None:
     # params = (post.group_ID,)
     # cursor.execute(sql, params)
     # conn.commit()
+def get_all_posts(user_id: bytes):
+    sql = load_sql("sql/posts/get_all_posts.sql")
+    cursor = conn.cursor(buffered=True)
+    cursor.execute(sql)
+    rows = cursor.fetchall()
+
+    posts = []
+    for row in rows:
+        post = threads.thread(
+            title=row[1],
+            creator_ID=row[6],
+            creator_name=row[6],
+            content=row[2],
+        )
+        post.post_id = row[0].hex()
+        post.creation_date = row[3]
+        post.like_count = row[4]
+        post.comment_count = row[5]
+        post.creator_name = row[6]
+        posts.append(post)
+    return posts
+
+
+def get_post_by_id(post_id: bytes):
+    sql = load_sql("sql/posts/get_post_by_id.sql")
+    params = (post_id,)
+    cursor = conn.cursor(buffered=True)
+    row = cursor.execute(sql, params)
+    row = cursor.fetchone()
+    if row is None:
+        return None
+    class viewPost:
+        pass
+    post = viewPost()
+    post.post_id = row[0].hex()
+    post.title = row[1]
+    post.content = row[2]
+    post.created_at = row[3]
+    post.like_count = row[4]
+    post.comment_count = row[5]
+    post.username = row[6]
+    post.dislike_count = 0
+    post.comments = []
+    post.creator_id = None
+
+    return post
 
 # FOR INTERNAL USE ONLY. USE GROUP_ID IN PYTHON CODE
 def get_college_id_by_name(

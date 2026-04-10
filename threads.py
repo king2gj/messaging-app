@@ -2,9 +2,10 @@ import datetime
 import uuid
 
 class thread:
-    def __init__(self, creator_ID, title, content, group_ID = None, course_code = None, section_ID = None, priority = 0):
-        self.thread_ID = uuid.uuid4()
+    def __init__(self, creator_ID, creator_name, title, content, group_ID = None, course_code = None, section_ID = None, priority = 0):
+        self.post_id = uuid.uuid4()
         self.creator_ID = creator_ID
+        self.creator_name = creator_name
         self.title = title
         self.content = content
         self.course_code = course_code
@@ -13,7 +14,8 @@ class thread:
         self.priority = priority
         self.members = [creator_ID]
         self.messages = []
-        self.message_count = 0
+        self.comment_count = 0
+        self.like_count = 0
         self.announcement = False
         self.creation_date = datetime.datetime.now()
         self.last_message_date = None
@@ -29,7 +31,7 @@ class thread:
             if self.is_locked != True:
                 if self.is_active == True:
                     self.messages.append(message)
-                    self.message_count += 1
+                    self.comment_count += 1
                     self.last_message_date = datetime.datetime.now()
                     self.last_message = message
                 else:
@@ -86,7 +88,7 @@ class thread:
         if self.is_locked != True:
             if self.is_active == True:
                 self.messages.remove(message)
-                self.message_count -= 1
+                self.comment_count -= 1
             else:
                 return "Thread is not active."
         else:
@@ -132,7 +134,7 @@ class thread:
         self.is_locked = True
 
     def display_thread(self):
-        header =  f"Thread Name: {self.name}\nDescription: {self.description}\nCreation Date: {self.creation_date}\nMessage Count: {self.message_count}\nMembers: {self.members}\nIs Active: {self.is_active}\n"
+        header =  f"Thread Name: {self.name}\nDescription: {self.description}\nCreation Date: {self.creation_date}\nComment Count: {self.comment_count}\nMembers: {self.members}\nIs Active: {self.is_active}\n"
         
         messages = "\n\n".join(str(message) for message in self.messages)
 
@@ -178,7 +180,7 @@ class thread:
                     self.priority = None
                     self.members = None
                     self.messages = None
-                    self.message_count = None
+                    self.comment_count = None
                     self.creation_date = None
                     self.last_message_date = None
                     self.last_message = None

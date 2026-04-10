@@ -18,6 +18,7 @@ def dashboard():
         return redirect(url_for('signin', error="User not logged in, Please sign in to access the dashboard."))
     return render_template(
         'home.html', 
+        posts=database.get_all_posts(session['user_id']),
         user_id=session['user_id']
     )
 
@@ -97,6 +98,7 @@ def create_post():
         new_thread = thread(
             title=title,
             creator_ID=session['user_id'],
+            creator_name=database.get_user_object(session['user_id'], conn.cursor()).username,
             content=content
         )
         try:
@@ -114,18 +116,15 @@ def search():
         return render_template("search_results.html", results=results)
     return render_template("search.html")
 
-@board.route("/view_post/<int:post_id>", methods=["GET", "POST"])
+@board.route("/view_post/<post_id>", methods=["GET", "POST"])
 def view_post(post_id):  
-    post = db.get_post(post_id, conn.cursor())
-    if post:
-        return render_template("view_post.html", post=post)
-    else:
+    print(f"Viewing post with ID: {post_id}, type: {type(post_id)}")
+    if 'user_id' not in session:
+        return redirect(url_for('signin'))
+    post = database.get_post_by_id(bytes.fromhex(post_id))
+    if not post:
         return "Post not found", 404
-    if request.method == "POST":
-        content = request.form.get("content")
-        db.add_reply(post_id, session['user_id'], content, conn.cursor())
-        return redirect(url_for("view_post", post_id=post_id))
-
+    return render_template("view_post.html", post=post)
 
 @board.route("/edit_post/<int:post_id>", methods=["GET", "POST"])
 def edit_post(post_id):

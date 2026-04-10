@@ -76,26 +76,26 @@
     </section>
 
     <section>
-      <h3 class="h5 text-muted mb-3">Thread of the Day</h3>
-      <div class="card mb-3">
-        <div class="card-body">
-          <div class="d-flex align-items-start mb-2">
-            <img src="{{ url_for('static', filename='images/john.svg') }}" class="rounded-circle me-3" width="48" height="48" alt="avatar">
-            <div>
-              <strong>John Doe</strong>
-              <p class="mb-1">Comment Text</p>
-              <div class="text-muted small">0 replies - 5 likes</div>
-              <div class="mt-2">
-                <div class="btn-group btn-group-sm" role="group" aria-label="post actions">
-                  <button type="button" class="btn btn-outline-secondary">Like<span class="visually-hidden">like</span></button>
-                  <button type="button" class="btn btn-outline-secondary">Comment</button><span class="visually-hidden">comment</span></button>
-                  <button type="button" class="btn btn-outline-secondary">Share<span class="visually-hidden">share</span></button>
+        <h3 class="h5 text-muted mb-3">Recent Posts</h3>
+       {% for post in posts %}
+        <a href="/view_post/{{ post.post_id }}" class="text-decoration-none text-dark">
+          <div class="card mb-3 card-hover">
+            <div class="card-body">
+              <div class="d-flex align-items-start mb-2">
+                <img src="{{ url_for('static', filename='images/john.svg') }}" class="rounded-circle me-3" width="48" height="48" alt="avatar">
+                <div class="w-100">
+                  <strong>{{ post.creator_name }}</strong>
+                  <h6 class="mb-1 mt-1">{{ post.title }}</h6>
+                  <p class="mb-1 text-muted">{{ post.content[:100] }}{% if post.content|length > 100 %}...{% endif %}</p>
+                  <div class="text-muted small">{{ post.creation_date.strftime('%B %d, %Y') }} · {{ post.comment_count }} replies · {{ post.like_count }} likes</div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        </a>
+        {% else %}
+        <p class="text-muted">No posts yet.</p>
+        {% endfor %}
     </section>
   </main>
 </div>
