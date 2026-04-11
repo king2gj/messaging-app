@@ -135,7 +135,7 @@ def add_new_post(post) -> None:
         raise ValueError("Content cannot exceed 500 characters")
 
     sql = load_sql("sql/posts/create_new_post.sql")
-    params = (post.title, post.post_id.bytes, post.creator_ID, post.creator_name, post.content, post.announcement)
+    params = (post.title, post.post_id.bytes, post.creator_ID, post.creator_name, post.content, post.announcement, post.group_ID)
     cursor = conn.cursor(buffered=True)
     cursor.execute(sql, params)
     conn.commit()

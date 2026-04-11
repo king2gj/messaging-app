@@ -105,19 +105,22 @@ def create_post():
         title = request.form.get("title")
         content = request.form.get("content")
         tags = request.form.get("tags")
+        group_id = request.form.get("group_id")
         new_thread = thread(
             title=title,
             creator_ID=session['user_id'],
             creator_name=database.get_user_object(session['user_id']).username,
-            content=content
+            content=content,
+            group_ID=bytes.fromhex(group_id) if group_id else None
         )
         try:
             database.add_new_post(new_thread)
             return redirect(url_for("dashboard"))
         except Exception as e:
-            print(f"Error creating post: {e}")
-            return render_template("create_post.html", error="An error occurred while creating the post. Please try again.")
-    return render_template("create_post.html")
+            return render_template("create_post.html", 
+                error="An error occurred while creating the post. Please try again.",
+                courses=database.get_course_by_user(session['user_id']))
+    return render_template("create_post.html", courses=database.get_course_by_user(session['user_id']))
 @board.route("/search", methods=["GET", "POST"])
 def search():
     if request.method == "POST":
@@ -134,7 +137,8 @@ def view_post(post_id):
     post = database.get_post_by_id(bytes.fromhex(post_id))
     if not post:
         return "Post not found", 404
-    return render_template("view_post.html", post=post)
+    courses = database.get_course_by_user(session['user_id'])
+    return render_template("view_post.html", post=post, courses=courses)
 
 @board.route("/edit_post/<int:post_id>", methods=["GET", "POST"])
 def edit_post(post_id):
