@@ -525,3 +525,9 @@ def edit_pfp(
     cursor = conn.cursor(buffered=True)
     cursor.execute(sql, params)
     conn.commit()
+
+def get_all_posts_by_user(user_id: bytes):
+    sql = load_sql("sql/posts/get_all_posts_made_by_user.sql")
+    cursor = conn.cursor(buffered=True)
+    cursor.execute(sql, (user_id,))
+    return cursor.fetchall()
