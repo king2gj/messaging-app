@@ -1,19 +1,12 @@
 {% extends "base.html" %}
-
 {% block title %}Posts{% endblock %}
-
 {% block content %}
+
 <div class="row">
   <div id="sidebar" class="collapse d-md-block col-md-3">
     <div class="card mb-4">
       <div class="card-body">
-        <h5 class="card-title">Message Board (Web Name)</h5>
-      </div>
-    </div>
-
-    <div class="card mb-4">
-      <div class="card-body">
-        <h5 class="card-title">Dashboard</h5>
+        <h5 class="card-title">Message Board</h5>
       </div>
     </div>
 
@@ -21,137 +14,55 @@
       <div class="card-body">
         <h6 class="mb-3">Courses</h6>
         <div class="list-group">
-          <button class="list-group-item list-group-item-action" type="button">CS 201</button>
-          <button class="list-group-item list-group-item-action" type="button">CS 4071</button>
-          <button class="list-group-item list-group-item-action" type="button">EECE 3093C</button>
-          <button class="list-group-item list-group-item-action" type="button">PSYC 1001</button>
+          <a href="/post" class="list-group-item list-group-item-action {% if not active_course %}active{% endif %}">
+            All Posts
+          </a>
+          {% for course in courses %}
+            <a href="/post?course_id={{ course[0].hex() }}"
+               class="list-group-item list-group-item-action {% if active_course == course[0].hex() %}active{% endif %}">
+              {{ course[1] }} - {{ course[2] }}
+            </a>
+          {% else %}
+            <p class="text-muted small mb-0">No courses yet.</p>
+          {% endfor %}
         </div>
       </div>
     </div>
-
   </div>
 
   <main class="col-md-9">
     <div class="d-flex justify-content-between align-items-center mb-3">
-      <div class="d-flex align-items-center gap-2">
-        <button class="btn btn-sm btn-outline-secondary d-md-none" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar" aria-controls="sidebar" aria-expanded="false">Menu</button>
-        <h2 class="h3 text-muted mb-0">Posts</h2>
-      </div>
+      <h2 class="h3 text-muted mb-0">
+        {% if active_course %}
+          {% for course in courses %}
+            {% if active_course == course[0].hex() %}{{ course[1] }} - {{ course[2] }}{% endif %}
+          {% endfor %}
+        {% else %}
+          All Posts
+        {% endif %}
+      </h2>
     </div>
 
-    <section>
-      <h3 class="h5 text-muted mb-3">Recent Posts</h3>
-      <div class="card mb-3">
-        <div class="card-body">
-          <div class="d-flex align-items-start mb-2">
-            <img src="{{ url_for('static', filename='images/john.svg') }}" class="rounded-circle me-3" width="48" height="48" alt="avatar">
-            <div>
-              <strong>John Doe (@johndoe)</strong>
-              <p class="mb-1">This is the first post. Discussing something interesting.</p>
-              <div class="text-muted small">2 comments - 5 likes - 1 dislikes</div>
-              <div class="text-muted small">Posted on March 20, 2026</div>
-              <div class="mt-2">
-                <div class="btn-group btn-group-sm" role="group" aria-label="post actions">
-                  <form method="POST" action="/like/1" class="d-inline">
-                    <button type="submit" class="btn btn-outline-secondary">Like</button>
-                  </form>
-                  <form method="POST" action="/dislike/1" class="d-inline">
-                    <button type="submit" class="btn btn-outline-secondary">Dislike</button>
-                  </form>
-                  <button type="button" class="btn btn-outline-secondary" onclick="window.location.href='/thread/1'">Comment</button>
-                </div>
+    {% for post in posts %}
+      <a href="/view_post/{{ post.post_id }}" class="text-decoration-none text-dark">
+        <div class="card mb-3 card-hover">
+          <div class="card-body">
+            <div class="d-flex align-items-start mb-2">
+              <img src="{{ url_for('static', filename='images/john.svg') }}" class="rounded-circle me-3" width="48" height="48" alt="avatar">
+              <div class="w-100">
+                <strong>{{ post.creator_name }}</strong>
+                <h6 class="mb-1 mt-1">{{ post.title }}</h6>
+                <p class="mb-1 text-muted">{{ post.content[:100] }}{% if post.content|length > 100 %}...{% endif %}</p>
+                <div class="text-muted small">{{ post.creation_date.strftime('%B %d, %Y') }} · {{ post.comment_count }} replies · {{ post.like_count }} likes</div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-
-      <div class="card mb-3">
-        <div class="card-body">
-          <div class="d-flex align-items-start mb-2">
-            <img src="{{ url_for('static', filename='images/john.svg') }}" class="rounded-circle me-3" width="48" height="48" alt="avatar">
-            <div>
-              <strong>Jane Smith (@janesmith)</strong>
-              <p class="mb-1">Another post about programming tips.</p>
-              <div class="text-muted small">0 comments - 3 likes - 0 dislikes</div>
-              <div class="text-muted small">Posted on March 21, 2026</div>
-              <div class="mt-2">
-                <div class="btn-group btn-group-sm" role="group" aria-label="post actions">
-                  <form method="POST" action="/like/2" class="d-inline">
-                    <button type="submit" class="btn btn-outline-secondary">Like</button>
-                  </form>
-                  <form method="POST" action="/dislike/2" class="d-inline">
-                    <button type="submit" class="btn btn-outline-secondary">Dislike</button>
-                  </form>
-                  <button type="button" class="btn btn-outline-secondary" onclick="window.location.href='/thread/2'">Comment</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card mb-3">
-        <div class="card-body">
-          <div class="d-flex align-items-start mb-2">
-            <img src="{{ url_for('static', filename='images/john.svg') }}" class="rounded-circle me-3" width="48" height="48" alt="avatar">
-            <div>
-              <strong>Bob Johnson (@bobjohnson)</strong>
-              <p class="mb-1">Question about Flask routing.</p>
-              <div class="text-muted small">1 comment - 2 likes - 0 dislikes</div>
-              <div class="text-muted small">Posted on March 22, 2026</div>
-              <div class="mt-2">
-                <div class="btn-group btn-group-sm" role="group" aria-label="post actions">
-                  <button type="button" class="btn btn-outline-secondary">Like</button>
-                  <button type="button" class="btn btn-outline-secondary">Comment</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Add more threads here for scrolling -->
-      <div class="card mb-3">
-        <div class="card-body">
-          <div class="d-flex align-items-start mb-2">
-            <img src="{{ url_for('static', filename='images/john.svg') }}" class="rounded-circle me-3" width="48" height="48" alt="avatar">
-            <div>
-              <strong>Alice Brown (@alicebrown)</strong>
-              <p class="mb-1">Sharing a cool project I built.</p>
-              <div class="text-muted small">4 comments - 10 likes - 2 dislikes</div>
-              <div class="text-muted small">Posted on March 19, 2026</div>
-              <div class="mt-2">
-                <div class="btn-group btn-group-sm" role="group" aria-label="post actions">
-                  <button type="button" class="btn btn-outline-secondary">Like</button>
-                  <button type="button" class="btn btn-outline-secondary">Comment</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card mb-3">
-        <div class="card-body">
-          <div class="d-flex align-items-start mb-2">
-            <img src="{{ url_for('static', filename='images/john.svg') }}" class="rounded-circle me-3" width="48" height="48" alt="avatar">
-            <div>
-              <strong>Charlie Wilson (@charliewilson)</strong>
-              <p class="mb-1">Thoughts on the latest tech news.</p>
-              <div class="text-muted small">3 comments - 7 likes - 1 dislikes</div>
-              <div class="text-muted small">Posted on March 18, 2026</div>
-              <div class="mt-2">
-                <div class="btn-group btn-group-sm" role="group" aria-label="post actions">
-                  <button type="button" class="btn btn-outline-secondary">Like</button>
-                  <button type="button" class="btn btn-outline-secondary">Comment</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+      </a>
+    {% else %}
+      <p class="text-muted">No posts yet.</p>
+    {% endfor %}
   </main>
 </div>
+
 {% endblock %}

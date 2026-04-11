@@ -11,20 +11,18 @@
       </div>
     </div>
 
-    <div class="card mb-4">
+        <div class="card mb-4">
       <div class="card-body">
-        <h5 class="card-title">Dashboard</h5>
-      </div>
-    </div>
-
-    <div class="card mb-4">
-      <div class="card-body">
-        <h6 class="mb-3">Courses</h6>
+        <h6 class="mb-3">Courses - Click a Course to Filter Posts</h6>
         <div class="list-group">
-          <button class="list-group-item list-group-item-action" type="button">CS 201</button>
-          <button class="list-group-item list-group-item-action" type="button">CS 4071</button>
-          <button class="list-group-item list-group-item-action" type="button">EECE 3093C</button>
-          <button class="list-group-item list-group-item-action" type="button">PSYC 1001</button>
+          {% for course in courses %}
+            <a href="/posts?course_id={{ course[0].hex() }}" 
+              class="list-group-item list-group-item-action">
+              {{ course[1] }} - {{ course[2] }}
+            </a>
+          {% else %}
+            <p class="text-muted small mb-0">No courses yet.</p>
+          {% endfor %}
         </div>
       </div>
     </div>
@@ -36,6 +34,9 @@
       <div class="d-flex align-items-center gap-2">
         <button class="btn btn-sm btn-outline-secondary d-md-none" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar" aria-controls="sidebar" aria-expanded="false">Menu</button>
         <h2 class="h3 text-muted mb-0">Dashboard</h2>
+        {% if error %}
+    				<div class="alert alert-danger py-2 small">{{ error }}</div>
+				{% endif %}
       </div>
     </div>
 

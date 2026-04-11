@@ -122,16 +122,20 @@ def add_new_user(
         params = (newUser.user_ID, newUser.password, newUser.salt_code)
         conn.cursor().execute(sql, params)
         conn.commit()
+def get_all_users():
+    cursor = conn.cursor(buffered=True)
+    cursor.execute("SELECT user_id, username, email FROM users ORDER BY username ASC")
+    return cursor.fetchall()    
 
 def add_new_post(post) -> None:
-    for x in {post.thread_ID.bytes, post.creator_ID}:
+    for x in {post.post_id.bytes, post.creator_ID}:
         if len(x) != 16:
             raise ValueError("All IDs must be 16 bytes")
     if len(post.content) > 500:
         raise ValueError("Content cannot exceed 500 characters")
 
     sql = load_sql("sql/posts/create_new_post.sql")
-    params = (post.title, post.thread_ID.bytes, post.creator_ID, post.creator_name, post.content, post.announcement)
+    params = (post.title, post.post_id.bytes, post.creator_ID, post.creator_name, post.content, post.announcement)
     cursor = conn.cursor(buffered=True)
     cursor.execute(sql, params)
     conn.commit()
@@ -189,8 +193,55 @@ def get_post_by_id(post_id: bytes):
     post.creator_id = None
 
     return post
-
+def get_posts_by_course(course_id: bytes):
+    sql = load_sql("sql/posts/get_posts_by_course.sql")
+    cursor = conn.cursor(buffered=True)
+    cursor.execute(sql, (course_id,))
+    rows = cursor.fetchall()
+    posts = []
+    for row in rows:
+        post = threads.thread(
+            title=row[1],
+            creator_ID=row[6],
+            creator_name=row[6],
+            content=row[2],
+        )
+        post.post_id = row[0].hex()
+        post.creation_date = row[3]
+        post.like_count = row[4]
+        post.comment_count = row[5]
+        post.creator_name = row[6]
+        posts.append(post)
+    return posts
 # FOR INTERNAL USE ONLY. USE GROUP_ID IN PYTHON CODE
+def get_course_by_user(user_id: bytes):
+    sql = load_sql("sql/courses/get_courses_by_user.sql")
+    params = (user_id,)
+    cursor = conn.cursor(buffered=True)
+    cursor.execute(sql, params)
+    return cursor.fetchall()
+def get_all_courses(user_id: bytes):
+    sql = load_sql("sql/courses/get_all_courses.sql")
+    cursor = conn.cursor(buffered=True)
+    cursor.execute(sql, (user_id,))
+    return cursor.fetchall()
+def add_user_to_course(user_id: bytes, course_code: str, role: str):
+    try:
+        sql = load_sql("sql/courses/add_user_to_course.sql")
+        if role not in {"student", "faculty"}:
+            raise ValueError("Role must be 'student' or 'faculty'")
+        if role == "faculty":
+            role = "Faculty"
+        elif role == "student":
+            role = "Student"
+        params = (user_id, course_code, role)
+        cursor = conn.cursor(buffered=True)
+        cursor.execute(sql, params)
+        conn.commit()
+        return True
+    except Exception as e:
+        print(f"Error adding user to course: {e}")
+        return False
 def get_college_id_by_name(
             name: str,
             cursor) -> bytes:
@@ -413,10 +464,10 @@ def add_profile_picture(
     cursor.execute(sql, params)
 
 def get_user_object(
-        user_id: bytes,
-        cursor) -> users.StandardUser | None:
+        user_id: bytes ) -> users.StandardUser | None:
     sql = load_sql("sql/users/get_user_info.sql")
     params = (user_id,)
+    cursor = conn.cursor(buffered=True)
     cursor.execute(sql, params)
 
     raw_data = cursor.fetchone()
@@ -426,6 +477,7 @@ def get_user_object(
 
     columns = [col[0] for col in cursor.description]
     dict_data = dict(zip(columns, raw_data))
+    print(f"raw is_admin from db: {dict_data['is_admin']}, type: {type(dict_data['is_admin'])}")
 
     user_kwargs = {
         "user_ID": uuid.UUID(bytes=dict_data["user_id"]),

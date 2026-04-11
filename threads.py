@@ -2,13 +2,13 @@ import datetime
 import uuid
 
 class thread:
-    def __init__(self, creator_ID, creator_name, title, content, group_ID = None, course_code = None, section_ID = None, priority = 0):
+    def __init__(self, creator_ID, creator_name, title, content, group_ID = None, course_id = None, section_ID = None, priority = 0):
         self.post_id = uuid.uuid4()
         self.creator_ID = creator_ID
         self.creator_name = creator_name
         self.title = title
         self.content = content
-        self.course_code = course_code
+        self.course_id = course_id
         self.section_ID = section_ID
         self.group_ID = group_ID
         self.priority = priority

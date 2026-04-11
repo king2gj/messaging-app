@@ -16,10 +16,13 @@ conn = db.connect()
 def dashboard():
     if 'user_id' not in session:
         return redirect(url_for('signin', error="User not logged in, Please sign in to access the dashboard."))
+    error = request.args.get("error")
     return render_template(
         'home.html', 
         posts=database.get_all_posts(session['user_id']),
-        user_id=session['user_id']
+        courses=database.get_course_by_user(session['user_id']),
+        user_id=session['user_id'],
+        error=error
     )
 
 @board.route("/signup", methods=["GET", "POST"])
@@ -72,7 +75,7 @@ def account():
     if 'user_id' not in session:
         return redirect(url_for('signin', error="User not logged in, Please sign in to access your account."))
     print(f"session user_id: {session['user_id']}, type: {type(session['user_id'])}")
-    user = database.get_user_object(session['user_id'], conn.cursor())
+    user = database.get_user_object(session['user_id'])
     return render_template("account.html", user=user)
 
 @board.route("/account_edit", methods=["GET", "POST"])
@@ -86,7 +89,14 @@ def update_account():
         db.updateuser(email, password)
         return redirect(url_for("account"))
     return render_template("account_edit.html")
-
+@board.route("/posts")
+def posts_page():
+    if 'user_id' not in session:
+        return redirect(url_for('signin'))
+    course_id = request.args.get("course_id")
+    posts = database.get_posts_by_course(bytes.fromhex(course_id)) if course_id else database.get_all_posts(session['user_id'])
+    courses = database.get_course_by_user(session['user_id'])
+    return render_template('posts.html', posts=posts, courses=courses, active_course=course_id)
 @board.route("/create_post", methods=["GET", "POST"]) 
 def create_post():
     if 'user_id' not in session:
@@ -98,7 +108,7 @@ def create_post():
         new_thread = thread(
             title=title,
             creator_ID=session['user_id'],
-            creator_name=database.get_user_object(session['user_id'], conn.cursor()).username,
+            creator_name=database.get_user_object(session['user_id']).username,
             content=content
         )
         try:
@@ -134,7 +144,7 @@ def edit_post(post_id):
     if request.method == "POST":
         db.get_post(post_id, conn.cursor())
         if post.author_id != session['user_id']:
-            return "Unauthorized", 403
+            return render_template("home.html", error="You do not have permission to access this page.")
         else:
             title = request.form.get("title")
             content = request.form.get("content")
@@ -142,9 +152,41 @@ def edit_post(post_id):
             return redirect(url_for("view_post", post_id=post_id))
 
 
-@board.route("/testpost")
-def testpost():
-    return render_template("testpost.html")
+@board.route("/admin/enroll", methods=["GET", "POST"])
+def admin_enroll():
+    if 'user_id' not in session:
+        return redirect(url_for('signin',))
+    # check if user is admin
+    user = database.get_user_object(session['user_id'])
+    if not bool(user.is_admin):
+        return redirect(url_for('dashboard', error="You do not have permission to access this page."))
+    selected_user_id = request.args.get("selected_user")
+    courses = database.get_all_courses(bytes.fromhex(selected_user_id)) if selected_user_id else []
+
+    if request.method == "POST":
+        target_user_id = bytes.fromhex(request.form.get("user_id"))
+        group_id = bytes.fromhex(request.form.get("group_id"))
+        role = request.form.get("is_faculty") or "student"  # "faculty" if checked, "student" if not
+        result = database.add_user_to_course(target_user_id, group_id, role)
+        remaining_courses = database.get_all_courses(target_user_id)
+        target_user_hex = request.form.get("user_id")
+        if result:
+            return render_template("admin_enroll.html",
+                success="User enrolled successfully.",
+                users=database.get_all_users(),
+                courses=remaining_courses,
+                selected_user=target_user_hex)
+        else:
+            return render_template("admin_enroll.html",
+                error="Failed to enroll user.",
+                users=database.get_all_users(),
+                courses=remaining_courses,
+                selected_user=target_user_hex)
+    
+    return render_template("admin_enroll.html",
+        users=database.get_all_users(),
+        courses=courses,
+        selected_user=selected_user_id)
 
 
 if __name__ == '__main__':

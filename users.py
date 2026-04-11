@@ -19,7 +19,7 @@ class StandardUser:
             self.last_name = None
 
         self.type = "standard_user"
-        self.is_admin = False
+        self.is_admin = self.is_admin or False
 
         if not hasattr(self, 'date_joined'):
             self.date_joined = datetime.datetime.now()

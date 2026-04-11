@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Admin - Enroll User{% endblock %}
+{% block content %}
+
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <h2 class="mb-4">Enroll User in Course</h2>
+
+    {% if error %}
+      <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+    {% if success %}
+      <div class="alert alert-success">{{ success }}</div>
+    {% endif %}
+
+    <div class="card">
+      <div class="card-body">
+        <form action="/admin/enroll" method="POST">
+          <div class="mb-3">
+            <label class="form-label">Select User</label>
+            <select name="user_id" class="form-select" required onchange="window.location.href='/admin/enroll?selected_user=' + this.value">
+                <option value="">-- Choose a user --</option>
+                    {% for u in users %}
+                <option value="{{ u[0].hex() }}" {% if selected_user == u[0].hex() %}selected{% endif %}>
+                    {{ u[1] }} ({{ u[2] }})
+                </option>
+                    {% endfor %}
+            </select>
+        </div>
+
+          <div class="mb-3">
+            <label class="form-label">Select Course</label>
+            <select name="group_id" class="form-select" required>
+              <option value="">-- Choose a course --</option>
+              {% for course in courses %}
+                <option value="{{ course[3].hex() }}">{{ course[1] }} - {{ course[2] }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="is_faculty" id="is_faculty" value="faculty">
+                <label class="form-check-label" for="is_faculty">Is Faculty</label>
+            </div>
+        </div>
+
+          <button type="submit" class="btn btn-primary">Enroll User</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
