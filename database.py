@@ -493,3 +493,35 @@ def get_user_object(
     }
 
     return users.StandardUser(**user_kwargs)
+
+def edit_post(
+        post_id: bytes,
+        content: str) -> None:
+    sql = load_sql("sql/posts/update_post.sql")
+    params = (content, post_id)
+
+    cursor = conn.cursor(buffered=True)
+    cursor.execute(sql, params)
+    conn.commit()
+
+def edit_profile(
+        user_id: bytes,
+        username: str,
+        email: str,
+        bio: str) -> None:
+    sql = load_sql("sql/users/edit_user.sql")
+    params = (username, email, bio, user_id)
+
+    cursor = conn.cursor(buffered=True)
+    cursor.execute(sql, params)
+    conn.commit()
+
+def edit_pfp(
+        user_id: bytes,
+        file_path: str) -> None:
+    sql = load_sql("sql/media/edit_pfp.sql")
+    params = (file_path, user_id)
+
+    cursor = conn.cursor(buffered=True)
+    cursor.execute(sql, params)
+    conn.commit()
